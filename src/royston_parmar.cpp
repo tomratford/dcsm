@@ -16,8 +16,7 @@ using namespace splines2;
 
 // [[Rcpp::plugins(cpp11)]]
 
-NaturalCubicSpline::NaturalCubicSpline(vec gammas_, vec knots_,
-                                       vec boundaries_)
+NaturalCubicSpline::NaturalCubicSpline(vec gammas_, vec knots_, vec boundaries_)
     : gammas(gammas_), knots(knots_), boundaries(boundaries_) {}
 
 vec NaturalCubicSpline::S(vec &x) const {
@@ -37,17 +36,16 @@ vec NaturalCubicSpline::intensity(vec &x, vec &z, double theta) {
   return (res);
 }
 
-NaturalCubicSpline* makeSpline(vec gammas, vec knots, vec boundaries) {
+NaturalCubicSpline *makeSpline(vec gammas, vec knots, vec boundaries) {
   return new NaturalCubicSpline(gammas, knots, boundaries);
 }
 
 RCPP_MODULE(mySplines) {
   class_<NaturalCubicSpline>("NaturalCubicSpline")
-  .factory<vec, vec, vec>(makeSpline)
-  .method("S", &NaturalCubicSpline::S)
-  .method("ds", &NaturalCubicSpline::dS)
-  .method("intensity", &NaturalCubicSpline::intensity)
-  ;
+      .factory<vec, vec, vec>(makeSpline)
+      .method("S", &NaturalCubicSpline::S)
+      .method("ds", &NaturalCubicSpline::dS)
+      .method("intensity", &NaturalCubicSpline::intensity);
 }
 
 vec minus_Intensity(vec &l, vec &r, vec &z, double theta,
@@ -97,15 +95,14 @@ vec RoystonParmarFns::P11(vec &l, vec &r, vec &z) const {
 //' @param l The lower bound of the integral (not logged)
 //' @param r The upper bound of the integral (not logged)
 //' @param z The vector of patient treatment arms
-vec RoystonParmarFns::P01Integrand(vec &v, vec &l, vec &r, vec&z) const {
+vec RoystonParmarFns::P01Integrand(vec &v, vec &l, vec &r, vec &z) const {
   vec u = exp(v);
-  return (P00(l,u,z) % spline01.dS(v) % exp(spline01.S(v)) % P11(u,r,z));
+  return (P00(l, u, z) % spline01.dS(v) % exp(spline01.S(v)) % P11(u, r, z));
 }
 
-P01int::P01int(double left_, double right_, vec &z_,
-               RoystonParmarFns &fns_): left(left_), right(right_),
-               z(z_), fns(fns_) {}
-double P01int::operator()(const double& x) const {return(0);}
+P01int::P01int(double left_, double right_, vec &z_, RoystonParmarFns &fns_)
+    : left(left_), right(right_), z(z_), fns(fns_) {}
+double P01int::operator()(const double &x) const { return (0); }
 void P01int::eval(double *x, const int n) const {
   vec l(n);
   l.fill(left);
@@ -119,12 +116,10 @@ void P01int::eval(double *x, const int n) const {
 
 // [[Rcpp::export]]
 vec P01(vec &l, vec &r, vec &z, double theta01_, double theta02_,
-        double theta12_, vec gammas01, vec knots01,
-        vec gammas02, vec knots02, vec gammas12,
-        vec knots12, vec boundaries) {
-  RoystonParmarFns fns(theta01_, theta02_, theta12_, gammas01,  knots01,
-                        gammas02,  knots02,  gammas12,
-                        knots12,  boundaries);
+        double theta12_, vec gammas01, vec knots01, vec gammas02, vec knots02,
+        vec gammas12, vec knots12, vec boundaries) {
+  RoystonParmarFns fns(theta01_, theta02_, theta12_, gammas01, knots01,
+                       gammas02, knots02, gammas12, knots12, boundaries);
   vec res(l.n_elem);
   vec logl = log(l);
   vec logr = log(r);
@@ -140,13 +135,12 @@ vec P01(vec &l, vec &r, vec &z, double theta01_, double theta02_,
 
 RCPP_MODULE(RoystonParmar) {
   class_<RoystonParmarFns>("RoystonParmarFns")
-  .constructor<double, double, double, vec, vec, vec, vec, vec, vec, vec>()
-  .method("int02", &RoystonParmarFns::int02)
-  .method("int12", &RoystonParmarFns::int12)
-  .method("logP00", &RoystonParmarFns::logP00)
-  .method("P00", &RoystonParmarFns::P00)
-  .method("logP11", &RoystonParmarFns::logP11)
-  .method("P11", &RoystonParmarFns::P11)
-  .method("P01Integrand", &RoystonParmarFns::P01Integrand)
-  ;
+      .constructor<double, double, double, vec, vec, vec, vec, vec, vec, vec>()
+      .method("int02", &RoystonParmarFns::int02)
+      .method("int12", &RoystonParmarFns::int12)
+      .method("logP00", &RoystonParmarFns::logP00)
+      .method("P00", &RoystonParmarFns::P00)
+      .method("logP11", &RoystonParmarFns::logP11)
+      .method("P11", &RoystonParmarFns::P11)
+      .method("P01Integrand", &RoystonParmarFns::P01Integrand);
 }

@@ -53,13 +53,13 @@ private:
   double right;
   vec &z;
   RoystonParmarFns &fns;
+
 public:
-  P01int(double left_, double right_, vec &z_,
-         RoystonParmarFns &fns_);
+  P01int(double left_, double right_, vec &z_, RoystonParmarFns &fns_);
   double operator()(const double &x) const;
   void eval(double *x, const int n) const;
 };
 
-vec P01(vec &l, vec &r, vec &z, RoystonParmarFns& fns_);
+vec P01(vec &l, vec &r, vec &z, RoystonParmarFns &fns_);
 
 #endif
