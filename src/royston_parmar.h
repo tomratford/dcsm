@@ -8,14 +8,16 @@ using namespace Numer;
 
 class NaturalCubicSpline {
 private:
-  const vec &gammas;
-  const vec &knots;
-  const vec &boundaries;
+  const vec gammas;
+  const vec knots;
+  const vec boundaries;
+
 public:
-  NaturalCubicSpline(vec &gammas_, vec &knots_, vec &boundaries_);
+  NaturalCubicSpline(vec gammas_, vec knots_, vec boundaries_);
   vec S(vec &x) const;
   vec dS(vec &x) const;
   vec intensity(vec &x, vec &z, double theta);
+  void debug();
 };
 
 vec minus_Intensity(vec &l, vec &r, vec &z, double theta,
@@ -26,6 +28,7 @@ private:
   const double theta01;
   const double theta02;
   const double theta12;
+
 public:
   NaturalCubicSpline spline01;
   NaturalCubicSpline spline02;
@@ -41,20 +44,22 @@ public:
   vec P00(vec &r, vec &l, vec &z) const;
   vec logP11(vec &l, vec &r, vec &z) const;
   vec P11(vec &r, vec &l, vec &z) const;
-  vec P01(vec &l, vec &r, vec &z);
+  vec P01Integrand(vec &v, vec &l, vec &r, vec &z) const;
 };
 
-class P01Integrand: public Func {
+class P01int : public Func {
 private:
-  double leftbound;
-  double rightbound;
+  double left;
+  double right;
   vec &z;
-  RoystonParmarFns fns;
+  RoystonParmarFns &fns;
 public:
-  P01Integrand(double leftbound_, double rightbound_, vec &z_,
-               RoystonParmarFns fns_);
+  P01int(double left_, double right_, vec &z_,
+         RoystonParmarFns &fns_);
   double operator()(const double &x) const;
   void eval(double *x, const int n) const;
 };
+
+vec P01(vec &l, vec &r, vec &z, RoystonParmarFns& fns_);
 
 #endif
