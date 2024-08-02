@@ -11,34 +11,30 @@ using namespace Numer;
 using namespace splines2;
 
 #include <functional>
+#include "royston_parmar.h"
 
 // [[Rcpp::plugins(cpp11)]]
 
-class NaturalCubicSpline {
-public:
-  NaturalCubicSpline(vec &gammas_, vec &knots_, vec &boundaries_)
-    : gammas(gammas_), knots(knots_), boundaries(boundaries_) {}
+NaturalCubicSpline::NaturalCubicSpline(vec &gammas_, vec &knots_,
+                                       vec &boundaries_)
+  : gammas(gammas_), knots(knots_), boundaries(boundaries_) {}
 
-  vec S(vec &x) const {
-    NaturalSpline spline(x, knots, boundaries);
-    vec product = spline.basis() * gammas;
-    return (product);
-  }
+vec NaturalCubicSpline::S(vec &x) const {
+  NaturalSpline spline(x, knots, boundaries);
+  vec product = spline.basis() * gammas;
+  return (product);
+}
 
-  vec dS(vec &x) const {
-    NaturalSpline spline(x, knots, boundaries);
-    vec product = spline.derivative() * gammas;
-    return (product);
-  }
+vec NaturalCubicSpline::dS(vec &x) const {
+  NaturalSpline spline(x, knots, boundaries);
+  vec product = spline.derivative() * gammas;
+  return (product);
+}
 
-  vec intensity(vec &x, vec &z, double theta) {
-    vec res = 1 / exp(x) * dS(x) * exp(S(x) + z * theta);
-    return (res);
-  }
-
-private:
-  const vec &gammas, knots, boundaries;
-};
+vec NaturalCubicSpline::intensity(vec &x, vec &z, double theta) {
+  vec res = 1 / exp(x) * dS(x) * exp(S(x) + z * theta);
+  return (res);
+}
 
 vec minus_Intensity(vec &l, vec &r, vec &z, double theta,
                     NaturalCubicSpline spline) {
@@ -47,66 +43,55 @@ vec minus_Intensity(vec &l, vec &r, vec &z, double theta,
   return (res * exp(z * theta));
 }
 
-class RoystonParmarFns {
-private:
-  const double theta01, theta02, theta12;
+RoystonParmarFns::RoystonParmarFns(double theta01_, double theta02_,
+                                   double theta12_, vec gammas01, vec knots01,
+                                   vec gammas02, vec knots02, vec gammas12,
+                                   vec knots12, vec boundaries)
+  : theta01(theta01_), theta02(theta02_), theta12(theta12_),
+    spline01(gammas01, knots01, boundaries),
+    spline02(gammas02, knots02, boundaries),
+    spline12(gammas12, knots12, boundaries) {}
 
-public:
-  NaturalCubicSpline spline01, spline02, spline12;
+vec RoystonParmarFns::int02(vec &x, vec &z) {
+  return (spline02.intensity(x, z, theta02));
+}
 
-  RoystonParmarFns(double theta01_, double theta02_, double theta12_,
-                   vec gammas01, vec knots01, vec gammas02, vec knots02,
-                   vec gammas12, vec knots12, vec boundaries)
-    : theta01(theta01_), theta02(theta02_), theta12(theta12_),
-      spline01(gammas01, knots01, boundaries),
-      spline02(gammas02, knots02, boundaries),
-      spline12(gammas12, knots12, boundaries) {}
+vec RoystonParmarFns::int12(vec &x, vec &z) {
+  return (spline12.intensity(x, z, theta12));
+}
 
-  vec int02(vec &x, vec &z) { return (spline02.intensity(x, z, theta02)); }
+vec RoystonParmarFns::logP00(vec &l, vec &r, vec &z) const {
+  return (minus_Intensity(l, r, z, theta01, spline01) +
+          minus_Intensity(l, r, z, theta02, spline02));
+}
 
-  vec int12(vec &x, vec &z) { return (spline12.intensity(x, z, theta12)); }
+vec RoystonParmarFns::P00(vec &r, vec &l, vec &z) const {
+  return (exp(logP00(l, r, z)));
+}
 
-  vec logP00(vec &l, vec &r, vec &z) const {
-    return (minus_Intensity(l, r, z, theta01, spline01) +
-            minus_Intensity(l, r, z, theta02, spline02));
-  }
+vec RoystonParmarFns::logP11(vec &l, vec &r, vec &z) const {
+  return (minus_Intensity(l, r, z, theta12, spline12));
+}
 
-  vec P00(vec &r, vec &l, vec &z) const { return (exp(logP00(l, r, z))); }
+vec RoystonParmarFns::P11(vec &r, vec &l, vec &z) const {
+  return (exp(logP11(l, r, z)));
+}
 
-  vec logP11(vec &l, vec &r, vec &z) const {
-    return (minus_Intensity(l, r, z, theta12, spline12));
-  }
-
-  vec P11(vec &r, vec &l, vec &z) const { return (exp(logP11(l, r, z))); }
-
-  vec P01(vec &l, vec &r, vec &z);
-};
-
-class P01Integrand : public Func {
-private:
-  double leftbound;
-  double rightbound;
-  vec &z;
-  RoystonParmarFns fns;
-
-public:
-  P01Integrand(double leftbound_, double rightbound_, vec &z_,
-               RoystonParmarFns fns_)
-    : leftbound(leftbound_), rightbound(rightbound_), z(z_), fns(fns_) {}
-  double operator()(const double &x) const;
-  void eval(double *x, const int n) const {
-    vec l(1);
-    vec r(1);
-    l(0) = leftbound;
-    r(0) = rightbound;
-    vec v(n);
-    std::copy(x, x + n, v.begin());
-    vec u = exp(v);
-    vec res = fns.P00(l, u, z) * fns.spline01.dS(v) * exp(fns.spline01.S(v)) *
-      fns.P11(u, r, z);
-    x = res.memptr();
-  }
-};
+P01Integrand::P01Integrand(double leftbound_, double rightbound_, vec &z_,
+                           RoystonParmarFns fns_)
+  : leftbound(leftbound_), rightbound(rightbound_), z(z_), fns(fns_) {}
+void P01Integrand::eval(double *x, const int n) const {
+  vec l(1);
+  vec r(1);
+  l(0) = leftbound;
+  r(0) = rightbound;
+  vec v(n);
+  std::copy(x, x + n, v.begin());
+  vec u = exp(v);
+  vec res = fns.P00(l, u, z) * fns.spline01.dS(v) * exp(fns.spline01.S(v)) *
+    fns.P11(u, r, z);
+  x = res.memptr();
+}
 
 vec RoystonParmarFns::P01(vec &l, vec &r, vec &z) {
   vec res(l.n_elem);
@@ -131,5 +116,6 @@ RCPP_MODULE(mod_roystonparmar) {
   .method("P00", &RoystonParmarFns::P00)
   .method("logP11", &RoystonParmarFns::logP11)
   .method("P11", &RoystonParmarFns::P11)
-  .method("P01", &RoystonParmarFns::P01);
+  .method("P01", &RoystonParmarFns::P01)
+  ;
 }
