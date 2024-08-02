@@ -9,6 +9,12 @@ Description: More about what it does (maybe more than one line)
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
-Imports: Rcpp (>= 1.0.12)
-LinkingTo: Rcpp
+Imports: 
+    Rcpp (>= 1.0.12)
+LinkingTo: 
+    Rcpp,
+    RcppArmadillo,
+    RcppEigen,
+    RcppNumerical,
+    splines2
 RoxygenNote: 7.3.2
