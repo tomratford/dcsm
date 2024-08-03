@@ -33,6 +33,7 @@ public:
   NaturalCubicSpline spline01;
   NaturalCubicSpline spline02;
   NaturalCubicSpline spline12;
+  SEXP P01;
 
   RoystonParmarFns(double theta01_, double theta02_, double theta12_,
                    vec gammas01, vec knots01, vec gammas02, vec knots02,
@@ -51,11 +52,11 @@ class P01int : public Func {
 private:
   double left;
   double right;
-  vec &z;
+  double arm;
   RoystonParmarFns &fns;
 
 public:
-  P01int(double left_, double right_, vec &z_, RoystonParmarFns &fns_);
+  P01int(double left_, double right_, double arm_, RoystonParmarFns &fns_);
   double operator()(const double &x) const;
   void eval(double *x, const int n) const;
 };

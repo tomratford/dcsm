@@ -43,7 +43,8 @@ dc_loglik <- function(data, z = "ATRTN", fns = list(
   fnsP01 <- fns$P01
 
   # Factorising out P00(0,l), will be added back on at the end
-  logP00s <- fns$logP00(0, L, Z)
+  zeros <- rep(0,length(L)) # Avoids c++ errors
+  logP00s <- fns$logP00(zeros, L, Z)
 
   # Known progression group
   if (any(i)) { # ensure we have at least one case
