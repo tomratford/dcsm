@@ -40,6 +40,9 @@ royston_parmar.ll <- function(p, data) {
 #' Using an example, if we have one knotpoint in the transition from 0 to 1: \code{gamma010}, \code{gamma011}, \code{gamma012} must be provided as parameters.
 #'
 #' @return A list of functions.
+#'
+#' @importFrom methods new
+#'
 #' @rdname RoystonParmar
 royston_parmar.fnBuilder <- function(theta01, theta02, theta12, gammas01, knots01, gammas02, knots02, gammas12, knots12, boundaries) {
 
