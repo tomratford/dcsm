@@ -1,9 +1,9 @@
-#' Compute the log likelihood for a model with illness death
+#' Compute the log likelihood for a model with illness death and Weibull intensities
 #'
 #' @param p parameters, see \link{weibull}
 #' @param data dataset as per instructions in \link{dc_loglik}
 #'
-#' @return The loglikelihood for the data and parameters provided.
+#' @return The log-likelihood for the data and parameters provided.
 #' @export
 weib.ll <- function(p, data) {
   if (any(p[startsWith(names(p), "lambda")] < 0) || any(p[startsWith(names(p), "gamma")] < 0)) {
@@ -13,7 +13,7 @@ weib.ll <- function(p, data) {
             fns = do.call(
               weib.fnBuilder,
               as.list(p)
-            )) %>%
+            )) |>
     sum()
 }
 
