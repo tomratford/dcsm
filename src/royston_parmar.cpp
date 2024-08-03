@@ -113,7 +113,7 @@ void P01int::eval(double *x, const int n) const {
   vec v(n);
   std::copy(x, x + n, v.begin());
   vec res = fns.P01Integrand(v, l, r, z);
-  x = res.memptr();
+  std::copy(res.begin(), res.end(), x);
 }
 
 // [[Rcpp::export]]
