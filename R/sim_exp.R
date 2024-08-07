@@ -67,8 +67,8 @@ sim_exp <- function(N = 300,
     visits[, i + 1] <- i * (C_a / K) + rnorm(N, 0, C_a / (20 * K))
   }
   visits[visits < 0] <- 0
-  #visits[visits > C_a] <- C_a # truncate appropriately
   visits <- t(apply(visits, 1, sort)) # ensure a sensible order of visits
+  visits[visits > C_a] <- C_a # truncate any values greater censoring time
 
   # Inits
   delta0 <- vector("numeric", N)
@@ -131,7 +131,7 @@ sim_exp <- function(N = 300,
   T_02s[delta2 != 1] <- NA
   T_12s[delta2 != 1] <- NA
 
-  data.frame(
+  dat <- data.frame(
     T01 = T_01s,
     T02 = T_02s,
     T12 = T_12s,
@@ -146,4 +146,6 @@ sim_exp <- function(N = 300,
     delta2 = delta2,
     ATRTN = Zs
   )
+  attr(dat, "Ca") <- C_a
+  dat
 }
