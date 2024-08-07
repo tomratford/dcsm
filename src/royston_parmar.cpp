@@ -31,7 +31,8 @@ vec NaturalCubicSpline::dS(vec &x) const {
   return (product);
 }
 
-vec NaturalCubicSpline::intensity(vec &x, vec &z, double theta) {
+vec NaturalCubicSpline::intensity(vec &t, vec &z, double theta) {
+  vec x = log(t);
   vec res = (1 / exp(x)) % dS(x) % exp(S(x) + z * theta);
   return (res);
 }
@@ -44,7 +45,7 @@ RCPP_MODULE(mySplines) {
   class_<NaturalCubicSpline>("NaturalCubicSpline")
       .factory<vec, vec, vec>(makeSpline)
       .method("S", &NaturalCubicSpline::S)
-      .method("ds", &NaturalCubicSpline::dS)
+      .method("dS", &NaturalCubicSpline::dS)
       .method("intensity", &NaturalCubicSpline::intensity);
 }
 
@@ -64,12 +65,12 @@ RoystonParmarFns::RoystonParmarFns(double theta01_, double theta02_,
       spline02(gammas02, knots02, boundaries),
       spline12(gammas12, knots12, boundaries) {}
 
-vec RoystonParmarFns::int02(vec &x, vec &z) {
-  return (spline02.intensity(x, z, theta02));
+vec RoystonParmarFns::int02(vec &t, vec &z) {
+  return (spline02.intensity(t, z, theta02));
 }
 
-vec RoystonParmarFns::int12(vec &x, vec &z) {
-  return (spline12.intensity(x, z, theta12));
+vec RoystonParmarFns::int12(vec &t, vec &z) {
+  return (spline12.intensity(t, z, theta12));
 }
 
 vec RoystonParmarFns::logP00(vec &l, vec &r, vec &z) const {
