@@ -8,6 +8,16 @@
 #' @param theta02 The treatment effect for time-to-death pre-progression
 #' @param theta12 The treatment effect for time-to-death post-progression
 #' @param pct_no_prg The percent of observations assumed to have not progressed
+#' @param K The number of visits
+#'
+#' @details
+#' \eqn{T_{01} \sim \text{Exp}(\lambda_{01})} and
+#' \eqn{T_{02} \sim \text{Exp}(\lambda_{02})} are drawn first. If \eqn{T_{01}}
+#' is less than \eqn{T_02} then
+#' \eqn{T_12 \sim T_01 + \text{Exp}(\lambda_{12} \equiv \text{Gamma}(2, \lambda_{01} \times \lambda_{02}))}.
+#' These true values are then used to find \eqn{C_a}, the administrative
+#' censoring time as the 80th percentile of \eqn{D = T_{02} \vee T_{12}}.
+#'
 #'
 #' @return A data frame with 13 columns: \itemize{
 #'  \item `T01`, `T02`, `T12` - The 'true' times of the event based on the `lambdaXX` parameter.
@@ -34,13 +44,15 @@ sim_exp <- function(N = 300,
                     theta02 = log(0.4),
                     theta12 = log(1),
                     # %s under certain conditions
-                    pct_no_prg = 0.05) {
+                    pct_no_prg = 0.05,
+                    # # of visits
+                    K = 4) {
   # Assign treatment arm
   Zs <- rbinom(N, 1, 0.5)
 
   T_01s <- rexp(N, lambda01 * exp(Zs * theta01))
   T_02s <- rexp(N, lambda02 * exp(Zs * theta02))
-  T_12s <- T_01s + rexp(N, lambda12 * exp(Zs * theta12))
+  T_12s <- T_01s + rexp(N, lambda12 * exp(Zs * theta12)) #gamma
 
   D <- ifelse(T_01s < T_02s, T_12s, T_02s)
 
@@ -48,8 +60,6 @@ sim_exp <- function(N = 300,
   names(C_a) <- NULL
 
   # Get visit times
-  # No. of visits
-  K <- 4
   visits <- matrix(nrow = N, ncol = K + 2)
   visits[, 1] <- 0
   visits[, K + 2] <- C_a
@@ -114,6 +124,12 @@ sim_exp <- function(N = 300,
   true_time <- rep(C_a, N)
   true_time[delta1 == 1] <- T_01s[delta1 == 1]
   true_time[delta2 == 1] <- Vs[delta2 == 1]
+
+  # Hide the true values that arent' valid (this will make checking easier?)
+  T_12s[(delta1 == 1) & (delta2 == 1)] <- NA
+  T_02s[(delta1 != 1) & (delta2 == 1)] <- NA
+  T_02s[delta2 != 1] <- NA
+  T_12s[delta2 != 1] <- NA
 
   data.frame(
     T01 = T_01s,
