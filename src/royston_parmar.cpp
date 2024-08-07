@@ -49,9 +49,9 @@ RCPP_MODULE(mySplines) {
       .method("intensity", &NaturalCubicSpline::intensity);
 }
 
+// minus the integrated intensity (hence capitalised I) between points l and r
 vec minus_Intensity(vec &l, vec &r, vec &z, double theta,
                     NaturalCubicSpline spline) {
-  // Minus the integrated intensity (hence capitalised I)
   vec res = exp(spline.S(l)) - exp(spline.S(r));
   return (res % exp(z * theta));
 }
