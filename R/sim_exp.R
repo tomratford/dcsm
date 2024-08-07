@@ -38,7 +38,7 @@ sim_exp <- function(N = 300,
                     # Rates to ensure certain censoring values
                     lambda01 = 4,
                     lambda02 = 1,
-                    lambda12 = 0.5,
+                    lambda12 = 1.5,
                     # treatment effects
                     theta01 = log(0.4),
                     theta02 = log(0.4),
@@ -74,7 +74,7 @@ sim_exp <- function(N = 300,
   delta0 <- vector("numeric", N)
   delta1 <- vector("numeric", N)
   delta2 <- vector("numeric", N)
-  Ls <- visits[, K + 1]
+  Ls <- apply(visits, 1, \(row) max(row[row < C_a]))
   Rs <- visits[, K + 2]
   Vs <- Rs
 
