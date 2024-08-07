@@ -1,0 +1,69 @@
+---
+title: "Mean Squared Error for a Weibull baseline intensity"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Mean Squared Error for a Weibull baseline intensity}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(dcsm)
+library(survival)
+```
+
+```{r simulate_data, eval=F}
+N <- 200
+
+# true values
+lambda01 <- 4
+lambda02 <- 1
+lambda12 <- 0.5
+theta01 <- log(0.4)
+theta02 <- log(0.4)
+theta12 <- log(1)
+
+# true survivor function
+logS_t <- \(t,z) {
+  -(lambda01*exp(z*theta01) + lambda02*exp(z*theta02))*t
+}
+
+No_visits <- 4
+
+mse <- matrix(nrow=N,ncol=2)
+colnames(mse) <- c("Illness-death", "Crude PFS")
+for (i in 1:N) {
+  dat <- sim_exp(N = 300,
+                 lambda01,
+                 lambda02,
+                 lambda12,
+                 theta01,
+                 theta02,
+                 theta12,
+                 K = No_visits)
+  
+  # get KM error
+  km <- survfit(Surv(PFSDY, PFS) ~ ATRTN, data=dat)
+  km_resid <- logS_t(km$time, c(rep(0,km$strata[1]),rep(1,km$strata[2])))
+  
+  # using default initial values of lambda=gamma=1, theta=0
+  fit <- weib.fit(dat)
+  fns <- do.call(weib.fnBuilder,as.list(fit$par))
+  
+  fitted <- fns$logP00(0, dat$PFSDY, dat$ATRTN)
+  resid <-  logS_t(dat$PFSDY, dat$ATRTN) - fitted
+  mse[i,] <- c(mean(resid^2),mean(km_resid^2)) 
+}
+```
+
+```{r plot_density}
+plot(density(mse[,1]), xlim=c(0,1))
+lines(density(mse[,2]), col="red")
+```
