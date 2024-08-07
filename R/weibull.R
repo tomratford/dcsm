@@ -37,7 +37,7 @@ weib.ll <- function(p, data) {
   if (any(p[startsWith(names(p), "lambda")] < 0) || any(p[startsWith(names(p), "gamma")] < 0)) {
     return(-1e10)
   }
-  dc_loglik(dat,
+  dc_loglik(data,
             fns = do.call(
               weib.fnBuilder,
               as.list(p)
@@ -62,7 +62,8 @@ weib.ll <- function(p, data) {
 #' }
 #'
 #' @rdname weibull
-#' @return A list of functions, to be used in `?weib.ll`
+#' @return A list of functions, typically used in `?weib.ll`
+#' @export
 weib.fnBuilder <- function(lambda01,
                            gamma01,
                            theta01,
