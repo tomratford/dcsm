@@ -2,16 +2,21 @@
 #'
 #' @param p parameters, as a named list based off \link{RoystonParmar}
 #' @param data dataset as per instructions in \link{dc_loglik}
+#' @param indiv return a vector of each individual log-likelihood instead of the sum?
 #'
-#' @return The loglikelihood for the data and parameters provided.
+#' @return The log-likelihood for the data and parameters provided.
 #' @export
-royston_parmar.ll <- function(p, data) {
-  dc_loglik(data,
+royston_parmar.ll <- function(p, data, indiv=FALSE) {
+  lik <- dc_loglik(data,
             fns = do.call(
               royston_parmar.fnBuilder,
               p
-            )) |>
-    sum()
+            ))
+  if (indiv) {
+    return(lik)
+  } else {
+    return(sum(lik))
+  }
 }
 
 #' Functions for a illness-death model with natural cubic spline intensities
