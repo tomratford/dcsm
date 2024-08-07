@@ -9,7 +9,7 @@ royston_parmar.ll <- function(p, data) {
   dc_loglik(data,
             fns = do.call(
               royston_parmar.fnBuilder,
-              as.list(p)
+              p
             )) |>
     sum()
 }
