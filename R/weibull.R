@@ -1,3 +1,31 @@
+#' Fit a model based on starting parameters
+#'
+#' @param data Data set to fit to, must have entries as described in \link{dc_loglik}
+#' @param initial Vector of initial parameters
+#' @param control passed to \link{optim}, defaults to change the scale of the log-likelihood function
+#' @param method passed to \link{optim}, defaults to Nelder-Mead.
+#' @param ... additional parameters passed to \link{optim}
+#'
+#' @return A \link{optim} output
+#' @export
+weib.fit <- function(data,
+                     initial = c(
+                       "lambda01" = 1,
+                       "gamma01" = 1,
+                       "theta01" = 0,
+                       "lambda02" = 1,
+                       "gamma02" = 1,
+                       "theta02" = 0,
+                       "lambda12" = 1,
+                       "gamma12" = 1,
+                       "theta12" = 0
+                     ),
+                     control = list(fnscale = -1),
+                     method = "Nelder-Mead",
+                     ...) {
+  optim(initial, weib.ll, data = data, control = control, ...)
+}
+
 #' Compute the log likelihood for a model with illness death and Weibull intensities
 #'
 #' @param p parameters, see \link{weibull}
