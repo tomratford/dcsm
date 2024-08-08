@@ -34,7 +34,7 @@ vec NaturalCubicSpline::dS(vec &x) const {
 
 vec NaturalCubicSpline::intensity(vec &t, vec &z, double theta) {
   vec x = log(t);
-  vec res = (1 / exp(x)) % dS(x) % exp(S(x) + z * theta);
+  vec res = (1 / t) % dS(x) % exp(S(x) + z * theta);
   return (res);
 }
 
@@ -51,6 +51,7 @@ RCPP_MODULE(mySplines) {
 }
 
 // minus the integrated intensity (hence capitalised I) between points l and r
+// This is: -(exp(S(r)+z*theta) - exp(S(l)+z*theta))
 vec minus_Intensity(vec &l, vec &r, vec &z, double theta,
                     NaturalCubicSpline spline) {
   vec res = exp(spline.S(l)) - exp(spline.S(r));
@@ -108,12 +109,9 @@ P01int::P01int(double left_, double right_, double arm_, RoystonParmarFns &fns_)
     : left(left_), right(right_), arm(arm_), fns(fns_) {}
 double P01int::operator()(const double &x) const { return (0); }
 void P01int::eval(double *x, const int n) const {
-  vec l(n);
-  l.fill(left);
-  vec r(n);
-  r.fill(right);
-  vec z(n);
-  z.fill(arm);
+  vec l(n, fill::value(left));
+  vec r(n, fill::value(right));
+  vec z(n, fill::value(arm));
   vec v(n);
   std::copy(x, x + n, v.begin());
   vec res = fns.P01Integrand(v, l, r, z);
