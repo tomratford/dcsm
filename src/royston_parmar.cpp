@@ -1,7 +1,5 @@
 // [[Rcpp::depends(RcppArmadillo, RcppEigen, RcppNumerical, splines2)]]
 
-#include <RcppCommon.h>
-
 #include <RcppArmadillo.h>
 using namespace Rcpp;
 using namespace arma;
