@@ -102,6 +102,8 @@ vec RoystonParmarFns::P01Integrand(vec &v, vec &l, vec &r, vec &z) const {
   return (P00(l, u, z) % spline01.dS(v) % exp(spline01.S(v)) % P11(u, r, z));
 }
 
+// Used by RcppNumerical
+// `eval()` is used by the integrate function to calculate all the values
 P01int::P01int(double left_, double right_, double arm_, RoystonParmarFns &fns_)
     : left(left_), right(right_), arm(arm_), fns(fns_) {}
 double P01int::operator()(const double &x) const { return (0); }
@@ -133,6 +135,11 @@ vec P01(vec &l, vec &r, vec &z, double theta01_, double theta02_,
 
     P01int f(l(i), r(i), z(i), fns);
     res(i) = integrate(f, logl(i), logr(i), err_est, err_code);
+    if (err_code > 0) {
+      exception e("Error code greater than zero", err_code);
+      throw e;
+      stop("This should have stopped by now");
+    }
   }
   return (res);
 }
