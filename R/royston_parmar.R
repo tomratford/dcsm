@@ -8,8 +8,9 @@
 #' @return A list of parameters, to be fed to \link{royston_parmar.ll}
 #' @export
 #'
-#' @importFrom dplyr pull matches coalesce if_else
+#' @import dplyr
 #' @importFrom survival survfit Surv
+#' @importFrom splines2 nsp
 royston_parmar.initials <- function(data, k01, k02, k12) {
   # set initial list
   initials = list(
@@ -51,6 +52,7 @@ royston_parmar.initials <- function(data, k01, k02, k12) {
 
   # try to get sensible initial values
   # transition 01 values
+  data01 <- filter(data,delta1 == 1)
   fit01 <- survfit(Surv(L, R, delta1) ~ 1, data = data)
   cumhaz01 <- rep(fit01$cumhaz, fit01$n.event)
   coefs01 <- lm(
@@ -60,7 +62,7 @@ royston_parmar.initials <- function(data, k01, k02, k12) {
       knots = initials$knots01,
       Boundary.knots = initials$boundaries
     ) + ATRTN,
-    filter(data,delta1 == 1)
+    data01
   )$coef
   initials$gammas01 <- coefs01[-length(coefs01)]
   initials$theta01 <- coefs01[length(coefs01)]
@@ -155,17 +157,23 @@ royston_parmar.ll <- function(p, data, indiv=FALSE) {
 #' @rdname RoystonParmar
 royston_parmar.fnBuilder <- function(theta01, theta02, theta12, gammas01, knots01, gammas02, knots02, gammas12, knots12, boundaries) {
 
-  fns <- new(RoystonParmarFns,
+  fns <- new(IllnessDeath,
+             "RoystonParmar",
              theta01, theta02, theta12,
              gammas01, knots01,
              gammas02, knots02,
              gammas12, knots12,
              boundaries)
-  fns$P01 <- \(l,r,z) P01(l,r,z,
+  fns$P01 <- \(l,r,z) P01(l,r,z,"RoystonParmar",
                           theta01, theta02, theta12,
                           gammas01, knots01,
                           gammas02, knots02,
                           gammas12, knots12,
                           boundaries)
+  # fns$P01 <- Vectorize(\(l, r, z) integrate(
+  #   \(v) fns$P01Integrand(v, rep(l, length(v)), rep(r, length(v)), rep(z, length(v))),
+  #   lower = log(l),
+  #   upper = log(r)
+  # )$value)
   fns
 }

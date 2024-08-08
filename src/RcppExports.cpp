@@ -14,14 +14,15 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // P01
-vec P01(vec& l, vec& r, vec& z, double theta01_, double theta02_, double theta12_, vec gammas01, vec knots01, vec gammas02, vec knots02, vec gammas12, vec knots12, vec boundaries);
-RcppExport SEXP _dcsm_P01(SEXP lSEXP, SEXP rSEXP, SEXP zSEXP, SEXP theta01_SEXP, SEXP theta02_SEXP, SEXP theta12_SEXP, SEXP gammas01SEXP, SEXP knots01SEXP, SEXP gammas02SEXP, SEXP knots02SEXP, SEXP gammas12SEXP, SEXP knots12SEXP, SEXP boundariesSEXP) {
+vec P01(vec& l, vec& r, vec& z, String type, double theta01_, double theta02_, double theta12_, vec gammas01, vec knots01, vec gammas02, vec knots02, vec gammas12, vec knots12, vec boundaries);
+RcppExport SEXP _dcsm_P01(SEXP lSEXP, SEXP rSEXP, SEXP zSEXP, SEXP typeSEXP, SEXP theta01_SEXP, SEXP theta02_SEXP, SEXP theta12_SEXP, SEXP gammas01SEXP, SEXP knots01SEXP, SEXP gammas02SEXP, SEXP knots02SEXP, SEXP gammas12SEXP, SEXP knots12SEXP, SEXP boundariesSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< vec& >::type l(lSEXP);
     Rcpp::traits::input_parameter< vec& >::type r(rSEXP);
     Rcpp::traits::input_parameter< vec& >::type z(zSEXP);
+    Rcpp::traits::input_parameter< String >::type type(typeSEXP);
     Rcpp::traits::input_parameter< double >::type theta01_(theta01_SEXP);
     Rcpp::traits::input_parameter< double >::type theta02_(theta02_SEXP);
     Rcpp::traits::input_parameter< double >::type theta12_(theta12_SEXP);
@@ -32,18 +33,16 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< vec >::type gammas12(gammas12SEXP);
     Rcpp::traits::input_parameter< vec >::type knots12(knots12SEXP);
     Rcpp::traits::input_parameter< vec >::type boundaries(boundariesSEXP);
-    rcpp_result_gen = Rcpp::wrap(P01(l, r, z, theta01_, theta02_, theta12_, gammas01, knots01, gammas02, knots02, gammas12, knots12, boundaries));
+    rcpp_result_gen = Rcpp::wrap(P01(l, r, z, type, theta01_, theta02_, theta12_, gammas01, knots01, gammas02, knots02, gammas12, knots12, boundaries));
     return rcpp_result_gen;
 END_RCPP
 }
 
-RcppExport SEXP _rcpp_module_boot_mySplines();
-RcppExport SEXP _rcpp_module_boot_RoystonParmar();
+RcppExport SEXP _rcpp_module_boot_illness_death_mod();
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_dcsm_P01", (DL_FUNC) &_dcsm_P01, 13},
-    {"_rcpp_module_boot_mySplines", (DL_FUNC) &_rcpp_module_boot_mySplines, 0},
-    {"_rcpp_module_boot_RoystonParmar", (DL_FUNC) &_rcpp_module_boot_RoystonParmar, 0},
+    {"_dcsm_P01", (DL_FUNC) &_dcsm_P01, 14},
+    {"_rcpp_module_boot_illness_death_mod", (DL_FUNC) &_rcpp_module_boot_illness_death_mod, 0},
     {NULL, NULL, 0}
 };
 

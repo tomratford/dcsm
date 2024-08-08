@@ -1,4 +1,4 @@
 #' @importFrom Rcpp loadModule
 NULL
 
-loadModule("RoystonParmar", TRUE)
+loadModule("illness_death_mod", TRUE)
