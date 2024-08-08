@@ -38,87 +38,48 @@ royston_parmar.initials <- function(data, k01, k02, k12) {
   # try to get sensible initial values
   # transition 01 values
   fit01 <- survfit(Surv(L, R, delta1) ~ 1, data = data)
-  cumhaz01 <- rep(fit01$cumhaz, coalesce(na_if(fit01$n.event, 0), na_if(fit01$n.censor, 0)))
-  zeros01 <- which(cumhaz01 == 0) # need to be removed
-  if (length(zeros01) > 1) {
-    coefs01 <- lm(
-      log(cumhaz01)[-zeros01] ~ 0 + nsp(
-        PFSDY,
-        intercept = T,
-        knots = initials$knots01,
-        Boundary.knots = initials$boundaries
-      ) + ATRTN,
-      data[-zeros01, ]
-    )$coef
-  } else {
-    coefs01 <- lm(
-      log(cumhaz01) ~ 0 + nsp(
-        PFSDY,
-        intercept = T,
-        knots = initials$knots01,
-        Boundary.knots = initials$boundaries
-      ) + ATRTN,
-      data
-    )$coef
-  }
+  cumhaz01 <- rep(fit01$cumhaz, fit01$n.event)
+  coefs01 <- lm(
+    log(cumhaz01) ~ 0 + nsp(
+      PFSDY,
+      intercept = T,
+      knots = initials$knots01,
+      Boundary.knots = initials$boundaries
+    ) + ATRTN,
+    filter(data,delta1 == 1)
+  )$coef
   initials$gammas01 <- coefs01[-length(coefs01)]
   initials$theta01 <- coefs01[length(coefs01)]
 
   # transition 02 values
   data02 <- filter(data, delta1 == 0 & delta2 == 1)
   fit02 <- survfit(Surv(V, delta2) ~ 1, data = data02)
-  cumhaz02 <- rep(fit02$cumhaz, coalesce(na_if(fit02$n.event, 0), na_if(fit02$n.censor, 0)))
-  zeros02 <- which(cumhaz02 == 0)
-  if (length(zeros02) > 1) {
-    coefs02 <- lm(
-      log(cumhaz02)[-zeros02] ~ 0 + nsp(
-        PFSDY,
-        intercept = T,
-        knots = initials$knots02,
-        Boundary.knots = initials$boundaries
-      ) + ATRTN,
-      data02[-zeros02, ]
-    )$coef
-  } else {
-    coefs02 <- lm(
-      log(cumhaz02) ~ 0 + nsp(
-        PFSDY,
-        intercept = T,
-        knots = initials$knots02,
-        Boundary.knots = initials$boundaries
-      ) + ATRTN,
-      data02
-    )$coef
-  }
+  cumhaz02 <- rep(fit02$cumhaz, fit02$n.event)
+  coefs02 <- lm(
+    log(cumhaz02) ~ 0 + nsp(
+      PFSDY,
+      intercept = T,
+      knots = initials$knots02,
+      Boundary.knots = initials$boundaries
+    ) + ATRTN,
+    data02
+  )$coef
   initials$gammas02 <- coefs02[-length(coefs02)]
   initials$theta02 <- coefs02[length(coefs02)]
 
   # transition 12 values
   data12 <- filter(data, delta0 == 0 & delta2 == 1)
   fit12 <- survfit(Surv(V, delta2) ~ 1, data = data12)
-  cumhaz12 <- rep(fit12$cumhaz, coalesce(na_if(fit12$n.event, 0), na_if(fit12$n.censor, 0)))
-  zeros12 <- which(cumhaz12 == 0)
-  if (length(zeros12) > 1) {
-    coefs12 <- lm(
-      log(cumhaz12)[-zeros12] ~ 0 + nsp(
-        PFSDY,
-        intercept = T,
-        knots = initials$knots12,
-        Boundary.knots = initials$boundaries
-      ) + ATRTN,
-      data12[-zeros12, ]
-    )$coef
-  } else {
-    coefs12 <- lm(
-      log(cumhaz12) ~ 0 + nsp(
-        PFSDY,
-        intercept = T,
-        knots = initials$knots12,
-        Boundary.knots = initials$boundaries
-      ) + ATRTN,
-      data12
-    )$coef
-  }
+  cumhaz12 <- rep(fit12$cumhaz, fit12$n.event)
+  coefs12 <- lm(
+    log(cumhaz12) ~ 0 + nsp(
+      PFSDY,
+      intercept = T,
+      knots = initials$knots12,
+      Boundary.knots = initials$boundaries
+    ) + ATRTN,
+    data12
+  )$coef
   initials$gammas12 <- coefs12[-length(coefs12)]
   initials$theta12 <- coefs12[length(coefs12)]
 
