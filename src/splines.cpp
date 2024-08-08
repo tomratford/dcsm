@@ -61,4 +61,20 @@ vec CubicISpline::Intensity(const vec& t, const vec& z, double theta) const {
   return (res);
 }
 
+RCPP_MODULE(splines_mod) {
+  class_<NaturalCubicSpline>("NaturalCubicSpline")
+    .constructor<vec, vec, vec>()
+    .method("S", &NaturalCubicSpline::S)
+    .method("dS", &NaturalCubicSpline::dS)
+    .method("int", &NaturalCubicSpline::intensity)
+    .method("Int", &NaturalCubicSpline::Intensity)
+    ;
+  class_<CubicISpline>("CubicISpline")
+    .constructor<vec, vec, vec>()
+    .method("S", &CubicISpline::S)
+    .method("dS", &CubicISpline::dS)
+    .method("int", &CubicISpline::intensity)
+    .method("Int", &CubicISpline::Intensity)
+    ;
+}
 

@@ -2,6 +2,7 @@
 #define SPLINES_H
 
 #include <RcppArmadillo.h>
+using namespace Rcpp;
 using namespace arma;
 
 class Spline {

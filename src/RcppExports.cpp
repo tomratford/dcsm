@@ -39,10 +39,12 @@ END_RCPP
 }
 
 RcppExport SEXP _rcpp_module_boot_illness_death_mod();
+RcppExport SEXP _rcpp_module_boot_splines_mod();
 
 static const R_CallMethodDef CallEntries[] = {
     {"_dcsm_P01", (DL_FUNC) &_dcsm_P01, 14},
     {"_rcpp_module_boot_illness_death_mod", (DL_FUNC) &_rcpp_module_boot_illness_death_mod, 0},
+    {"_rcpp_module_boot_splines_mod", (DL_FUNC) &_rcpp_module_boot_splines_mod, 0},
     {NULL, NULL, 0}
 };
 

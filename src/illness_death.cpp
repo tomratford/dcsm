@@ -34,5 +34,4 @@ RCPP_MODULE(illness_death_mod) {
     .method("P01Integrand", &IllnessDeath::P01Integrand)
     .field("P01", &IllnessDeath::P01)
   ;
-
 }
