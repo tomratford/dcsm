@@ -1,4 +1,17 @@
+#' Get a set of (hopefully) feasible inital values for a Natural Cubic Spline based model
+#'
+#' @param data Data set to model from, with columns `L`, `R`, `V`, `Delta1`, `Delta2`
+#' @param k01 Number of interior knots in the 0 -> 1 transition
+#' @param k02 Number of interior knots in the 0 -> 2 transition
+#' @param k12 Number of interior knots in the 1 -> 2 transition
+#'
+#' @return A list of parameters, to be fed to \link{royston_parmar.ll}
+#' @export
+#'
+#' @importFrom dplyr pull matches coalesce if_else
+#' @importFrom survival survfit Surv
 royston_parmar.initials <- function(data, k01, k02, k12) {
+  # set initial list
   initials = list(
     theta01 = numeric(0),
     theta02 = numeric(0),
@@ -9,14 +22,15 @@ royston_parmar.initials <- function(data, k01, k02, k12) {
     knots02 = numeric(0),
     gammas12 = numeric(0),
     knots12 = numeric(0),
-    boundaries = c(min(data$V, 1 / 365.25), max(data$V))
+    #either day 1 or the smallest time in the data, recall that royston & parmar defined on the log scale.
+    boundaries = log(c(min(data$V, 1 / 365.25), max(data$V)))
   )
   # work out knot values
-  #important times
   delta1 <-  pull(data, matches("d(elta)?0?1", perl=T))
   delta2 <-  pull(data, matches("d(elta)?0?2", perl=T))
   Rs <- pull(data, matches("^r(ight)?", perl=T))
   Vs <- pull(data, matches("^v$"))
+  #important times
   itm <- coalesce(
     if_else(as.logical(delta1), Rs, NA),
     if_else(as.logical(delta2), Vs, NA)
@@ -24,15 +38,15 @@ royston_parmar.initials <- function(data, k01, k02, k12) {
   itmn <- length(itm)
   if (k01 > 0) {
     index <- round(seq(0,1,by=1/(k01+1))*itmn)
-    initials$knots01 <- c(itm[index[-length(index)]]) #index[length(index)] = boundary knot
+    initials$knots01 <- log(c(itm[index[-length(index)]])) #nb: index[length(index)] = boundary knot
   }
   if (k02 > 0) {
     index <- round(seq(0,1,by=1/(k02+1))*itmn)
-    initials$knots02 <- c(itm[index[-length(index)]]) #index[length(index)] = boundary knot
+    initials$knots02 <- log(c(itm[index[-length(index)]])) #nb: index[length(index)] = boundary knot
   }
   if (k12 > 0) {
     index <- round(seq(0,1,by=1/(k12+1))*itmn)
-    initials$knots12 <- c(itm[index[-length(index)]]) #index[length(index)] = boundary knot
+    initials$knots12 <- log(c(itm[index[-length(index)]])) #nb: index[length(index)] = boundary knot
   }
 
   # try to get sensible initial values
@@ -41,7 +55,7 @@ royston_parmar.initials <- function(data, k01, k02, k12) {
   cumhaz01 <- rep(fit01$cumhaz, fit01$n.event)
   coefs01 <- lm(
     log(cumhaz01) ~ 0 + nsp(
-      PFSDY,
+      log(PFSDY),
       intercept = T,
       knots = initials$knots01,
       Boundary.knots = initials$boundaries
@@ -57,7 +71,7 @@ royston_parmar.initials <- function(data, k01, k02, k12) {
   cumhaz02 <- rep(fit02$cumhaz, fit02$n.event)
   coefs02 <- lm(
     log(cumhaz02) ~ 0 + nsp(
-      PFSDY,
+      log(PFSDY),
       intercept = T,
       knots = initials$knots02,
       Boundary.knots = initials$boundaries
@@ -73,7 +87,7 @@ royston_parmar.initials <- function(data, k01, k02, k12) {
   cumhaz12 <- rep(fit12$cumhaz, fit12$n.event)
   coefs12 <- lm(
     log(cumhaz12) ~ 0 + nsp(
-      PFSDY,
+      log(PFSDY),
       intercept = T,
       knots = initials$knots12,
       Boundary.knots = initials$boundaries
