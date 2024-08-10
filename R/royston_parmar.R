@@ -9,7 +9,8 @@
 #' @export
 #'
 #' @import dplyr
-#' @importFrom survival survfit Surv
+#' @importFrom flexsurv flexsurvspline
+#' @importFrom survival Surv
 #' @importFrom splines2 nsp
 royston_parmar.initials <- function(data, k01, k02, k12) {
   # set initial list
@@ -53,49 +54,31 @@ royston_parmar.initials <- function(data, k01, k02, k12) {
   # try to get sensible initial values
   # transition 01 values
   data01 <- filter(data,delta1 == 1)
-  fit01 <- survfit(Surv(L, R, delta1) ~ 1, data = data)
-  cumhaz01 <- rep(fit01$cumhaz, fit01$n.event)
-  coefs01 <- lm(
-    log(cumhaz01) ~ 0 + nsp(
-      log(PFSDY),
-      intercept = T,
-      knots = initials$knots01,
-      Boundary.knots = initials$boundaries
-    ) + ATRTN,
-    data01
-  )$coef
+  fit01 <- flexsurvspline(Surv(R, delta1) ~ ATRTN,
+                          knots = initials$knots,
+                          bknots = initials$boundaries,
+                          data=data01)
+  coefs01 <- fit01$coef
   initials$gammas01 <- coefs01[-length(coefs01)]
   initials$theta01 <- coefs01[length(coefs01)]
 
   # transition 02 values
   data02 <- filter(data, delta1 == 0 & delta2 == 1)
-  fit02 <- survfit(Surv(V, delta2) ~ 1, data = data02)
-  cumhaz02 <- rep(fit02$cumhaz, fit02$n.event)
-  coefs02 <- lm(
-    log(cumhaz02) ~ 0 + nsp(
-      log(PFSDY),
-      intercept = T,
-      knots = initials$knots02,
-      Boundary.knots = initials$boundaries
-    ) + ATRTN,
-    data02
-  )$coef
+  fit02 <- flexsurvspline(Surv(V, delta2) ~ ATRTN,
+                          knots = initials$knots,
+                          bknots = initials$boundaries,
+                          data=data02)
+  coefs02 <- fit02$coef
   initials$gammas02 <- coefs02[-length(coefs02)]
   initials$theta02 <- coefs02[length(coefs02)]
 
   # transition 12 values
   data12 <- filter(data, delta0 == 0 & delta2 == 1)
-  fit12 <- survfit(Surv(V, delta2) ~ 1, data = data12)
-  cumhaz12 <- rep(fit12$cumhaz, fit12$n.event)
-  coefs12 <- lm(
-    log(cumhaz12) ~ 0 + nsp(
-      log(PFSDY),
-      intercept = T,
-      knots = initials$knots12,
-      Boundary.knots = initials$boundaries
-    ) + ATRTN,
-    data12
-  )$coef
+  fit12 <- flexsurvspline(Surv(V, delta2) ~ ATRTN,
+                          knots = initials$knots,
+                          bknots = initials$boundaries,
+                          data=data12)
+  coefs12 <- fit12$coef
   initials$gammas12 <- coefs12[-length(coefs12)]
   initials$theta12 <- coefs12[length(coefs12)]
 
