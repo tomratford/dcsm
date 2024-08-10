@@ -14,6 +14,7 @@ using namespace splines2;
 vec NaturalCubicSpline::S(const vec &x) const {
   NaturalSpline spline(x, knots, boundaries);
   vec product = spline.basis() * gammas;
+  product.replace(datum::nan, -datum::inf); // Working under the assumption that NaN => x = -inf => t = 0
   return (product);
 }
 
@@ -23,6 +24,7 @@ vec NaturalCubicSpline::dS(const vec &x) const {
   vec gammas_(gammas);
   gammas_(0) = 0;
   vec product = spline.derivative() * gammas_;
+  product.replace(datum::nan, -datum::inf); // Working under the assumption that NaN => x = -inf => t = 0
   return (product);
 }
 
