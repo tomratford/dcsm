@@ -15,7 +15,7 @@ public:
 
   vec minus_Intensity(const vec& l, const vec& r, const vec& z, double theta) const {
     vec res = Intensity(l, z, theta) - Intensity(r, z, theta);
-    return res % exp(z * theta);
+    return res;
   }
 };
 
