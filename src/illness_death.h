@@ -66,13 +66,11 @@ public:
                const vec& gammas02, const vec& knots02, 
                const vec& gammas12, const vec& knots12, const vec& boundaries)
       : IllnessDeath(theta01_, theta02_, theta12_,
-                     std::make_unique<NaturalCubicSpline>(gammas01, knots01, boundaries),
-                     std::make_unique<NaturalCubicSpline>(gammas02, knots02, boundaries),
-                     std::make_unique<NaturalCubicSpline>(gammas12, knots12, boundaries)) {}
+                     std::make_unique<CubicISpline>(gammas01, knots01, boundaries),
+                     std::make_unique<CubicISpline>(gammas02, knots02, boundaries),
+                     std::make_unique<CubicISpline>(gammas12, knots12, boundaries)) {}
 
-  vec P01Integrand(const vec& u, const vec& l, const vec& r, const vec& z) const {
-    return (P00(l, u, z) % spline01->intensity(u,z,theta01) % P11(u, r, z));
-  };
+  vec P01Integrand(const vec& u, const vec& l, const vec& r, const vec& z) const override;
 };
 
 IllnessDeath* MakeIllnessDeath(String type, double theta01_, double theta02_, double theta12_,

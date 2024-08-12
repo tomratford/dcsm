@@ -11,6 +11,8 @@ using namespace splines2;
 
 // Natural cubic splines definitions
 
+// x in these function refers to log(t).
+
 vec NaturalCubicSpline::S(const vec &x) const {
   NaturalSpline spline(x, knots, boundaries);
   vec product = spline.basis() * gammas;
@@ -53,6 +55,12 @@ vec CubicISpline::dS(const vec& t) const {
   return (product);
 }
 
+vec CubicISpline::dS2(const vec& t) const {
+  ISpline spline(t, knots, 3, boundaries);
+  vec product = spline.derivative(2) * gammas;
+  return (product);
+}
+
 vec CubicISpline::intensity(const vec& t, const vec& z, double theta) const {
   vec res = dS(t) % exp(z * theta);
   return (res);
@@ -75,6 +83,7 @@ RCPP_MODULE(splines_mod) {
     .constructor<vec, vec, vec>()
     .method("S", &CubicISpline::S)
     .method("dS", &CubicISpline::dS)
+    .method("dS2", &CubicISpline::dS2)
     .method("int", &CubicISpline::intensity)
     .method("Int", &CubicISpline::Intensity)
     ;

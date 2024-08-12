@@ -47,6 +47,7 @@ public:
 
   vec S(const vec& t) const override;
   vec dS(const vec& t) const override;
+  vec dS2(const vec& t) const;
   vec intensity(const vec& t, const vec& z, double theta) const override;
   vec Intensity(const vec& t, const vec& z, double theta) const override;
 };

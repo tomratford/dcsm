@@ -72,9 +72,14 @@ vec P01(vec &l, vec &r, vec &z, String type, double theta01_, double theta02_,
     P01int f(l(i), r(i), z(i), fns);
     res(i) = integrate(f, lower(i), upper(i), err_est, err_code);
     if (err_code > 0) {
-      exception e("Error code greater than zero", err_code);
-      throw e;
-      stop("This should have stopped by now");
+      switch (err_code) {
+      case 2:
+        std::cout << "WARNING: Roundoff error, result = " << res(i) << " error estimate = " << err_est << "\n";
+        res(i) = -1e10;
+        break;
+      default:
+        stop("Integration code greater than zero: " + std::to_string(err_code));
+      }
     }
   }
   

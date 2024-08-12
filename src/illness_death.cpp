@@ -6,6 +6,10 @@ using namespace arma;
 
 #include "illness_death.h"
 
+vec JolyPenalised::P01Integrand(const vec& u, const vec& l, const vec& r, const vec& z) const {
+  return (P00(l, u, z) % spline01->intensity(u,z,theta01) % P11(u, r, z));
+};
+
 IllnessDeath* MakeIllnessDeath(String type, double theta01_, double theta02_, double theta12_,
                                const vec& gammas01, const vec& knots01,
                                const vec& gammas02, const vec& knots02,
