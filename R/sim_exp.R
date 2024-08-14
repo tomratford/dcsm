@@ -56,7 +56,7 @@ sim_exp <- function(N = 300,
 
   D <- ifelse(T_01s < T_02s, T_12s, T_02s)
 
-  C_a <- 1 / quantile(D[Zs == 1], 0.8) # 20% of deaths censored
+  C_a <- quantile(D[Zs == 1], 0.8) # 20% of deaths censored
   names(C_a) <- NULL
 
   # Get visit times
@@ -110,6 +110,16 @@ sim_exp <- function(N = 300,
     Ls[died_in_this_int2] <- visits[, j][died_in_this_int2]
     Rs[died_in_this_int2] <- T_12s[died_in_this_int2]
   }
+  # Hacky fix:
+  # if R > V then set R to V provided it is less than L otherwise throw an error.
+  # This is a weird edge case in the post progression case, don't really understand why it happens
+  hack <- Rs > Vs
+  if (any(Ls[hack] > Vs[hack])) {
+    print(Ls[hack])
+    print(Vs[hack])
+    stop("This shouldn't happen. An L is greater than a V")
+  }
+  Rs[hack] <- Vs[hack]
 
   # potential known not progressed
   potentials <- which(delta0 == 0 & delta1 == 0)
@@ -125,11 +135,11 @@ sim_exp <- function(N = 300,
   true_time[delta1 == 1] <- T_01s[delta1 == 1]
   true_time[delta2 == 1] <- Vs[delta2 == 1]
 
-  # Hide the true values that arent' valid (this will make checking easier?)
-  T_12s[(delta1 == 1) & (delta2 == 1)] <- NA
-  T_02s[(delta1 != 1) & (delta2 == 1)] <- NA
-  T_02s[delta2 != 1] <- NA
-  T_12s[delta2 != 1] <- NA
+  # Hide the true values that arent' valid (this will make checking HARDER?)
+  # T_12s[(delta1 != 1) & (delta2 == 1)] <- NA
+  # T_02s[(delta1 == 1) & (delta2 == 1)] <- NA
+  # T_02s[delta2 != 1] <- NA
+  # T_12s[delta2 != 1] <- NA
 
   dat <- data.frame(
     T01 = T_01s,
@@ -147,5 +157,6 @@ sim_exp <- function(N = 300,
     ATRTN = Zs
   )
   attr(dat, "Ca") <- C_a
+  #attr(dat, "visits") <- visits
   dat
 }
