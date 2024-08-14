@@ -53,6 +53,7 @@ vec P01(vec &l, vec &r, vec &z, String type, double theta01_, double theta02_,
   if (type == String("RoystonParmar")) {
     fns = new RoystonParmar(theta01_, theta02_, theta12_, gammas01, knots01,
                       gammas02, knots02, gammas12, knots12, boundaries);
+    l.clamp(1e-9,datum::inf); // Do not allow zero => -inf
     lower = log(l);
     upper = log(r);
   } else if (type ==  "JolyPenalised") {
