@@ -1,3 +1,38 @@
+#' Fit a dataset to Royston & Parmar spline model.
+#'
+#' @param data Data set to model from
+#' @param k01 Number of interior knots in the 0 -> 1 transition
+#' @param k02 Number of interior knots in the 0 -> 2 transition
+#' @param k12 Number of interior knots in the 1 -> 2 transition
+#' @param debug Print every parameter tried?
+#'
+#' @return A \code{optim} object.
+#' @export
+royston_parmar.fit <- function(data, k01, k02, k12, debug=F, initials=NULL) {
+  if (is.null(initials))
+    initials <- royston_parmar.initials(data, k01, k02, k12)
+  p_init <- unlist(initials[c("theta01","theta02","theta12","gammas01","gammas02","gammas12")])
+  if (debug) print(initials)
+  optim(
+    unlist(p_init),
+    \(p) {
+      pars <- make_pars2(p,initials)
+      if (debug) print(pars[c("theta01", "theta02", "theta12", "gammas01","gammas02","gammas12")])
+      res <- tryCatch(royston_parmar.ll(pars, data),
+               error = \(e) {
+                 print(e)
+                 return(-1e10)
+               })
+      if (debug) print(res)
+      res
+    },
+    control = list(
+      fnscale = -1
+    ),
+    method="Nelder-Mead"
+  )
+}
+
 #' Get a set of (hopefully) feasible inital values for a Natural Cubic Spline based model
 #'
 #' @param data Data set to model from, with columns `L`, `R`, `V`, `Delta1`, `Delta2`
