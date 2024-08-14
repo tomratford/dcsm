@@ -51,7 +51,8 @@ dc_loglik <- function(data, z = "ATRTN", fns = list(
     lhs.P01s <- fnsP01(L[i], R[i], Z[i])
     lhs.logP11s <- fns$logP11(R[i], V[i], Z[i])
     tryCatch({
-      lhs.loglik <- log(lhs.P01s) + lhs.logP11s
+      lhs.logP01s <- log(lhs.P01s)
+      lhs.loglik <- lhs.logP01s + lhs.logP11s
       nd_cnst <- which((i & dth)[i])
     },
     error = \(e) {
@@ -63,7 +64,10 @@ dc_loglik <- function(data, z = "ATRTN", fns = list(
         lhs.loglik[nd_cnst] <- lhs.loglik[nd_cnst] + log(fns$int12(V[nd_cnst], Z[nd_cnst])),
         warning = \(w) {
           print(w)
-          print(V[nd_cnst][which(is.nan(log(fns$int12(V[nd_cnst], Z[nd_cnst]))))])
+          # print(V[nd_cnst][which(is.nan(log(fns$int12(V[nd_cnst], Z[nd_cnst]))))])
+          # curve(fns$int12(x,rep(0,length(x))), from=min(V[nd_cnst]),to=max(V[nd_cnst]))
+          # curve(fns$int12(x,rep(1,length(x))), col="red", add=T)
+          # abline(h = 0, lty=2, col="darkgrey")
         }
       )
     }
@@ -73,7 +77,8 @@ dc_loglik <- function(data, z = "ATRTN", fns = list(
 
   # known not to progress
   if (any(j)) { # Ensure we have at least one case
-    rhs.loglik <- log(fns$P00(L[j], V[j], Z[j]))
+    rhs.loglik <- fns$logP00(L[j], V[j], Z[j])
+    rhs.loglik.imp <- rhs.loglik > 0
     nd_cnst2 <- which((j & dth)[j])
     if (any(nd_cnst2)) {
       rhs.loglik[nd_cnst2] <- rhs.loglik[nd_cnst2] + log(fns$int02(V[nd_cnst2], Z[nd_cnst2]))
@@ -81,6 +86,7 @@ dc_loglik <- function(data, z = "ATRTN", fns = list(
   } else
   {
     rhs.loglik <- 0
+    rhs.loglik.imp <- FALSE
   }
 
   # Dual censored observations
@@ -89,6 +95,7 @@ dc_loglik <- function(data, z = "ATRTN", fns = list(
   both.lhs.lik <- both.lhs.P01s * both.lhs.P11s
 
   both.rhs.lik <- fns$P00(L[bth], V[bth], Z[bth])
+  both.rhs.lik.imp <- both.rhs.lik > 1
 
   nd_cnst3 <- which((bth & dth)[bth])
   if (any(nd_cnst3)) {
@@ -108,5 +115,14 @@ dc_loglik <- function(data, z = "ATRTN", fns = list(
   loglik[j] <- rhs.loglik
   loglik[bth] <- both.loglik
   loglik <- loglik + logP00s
+  # Find any 'impossible' cases (i.e. Pxx > 1, logPxx > 0) and return these as -1e10
+  imp_cases <- logP00s > 0
+  imp_cases[i] <- imp_cases[i] | (lhs.P01s > 1 | lhs.logP11s > 0)
+  imp_cases[j] <- imp_cases[j] | rhs.loglik.imp
+  imp_cases[bth] <- imp_cases[bth] | (both.lhs.P11s > 1 | both.lhs.P01s > 1 | both.rhs.lik.imp )
+  if (any(imp_cases)) {
+    browser()
+  }
+  loglik[imp_cases] <- -1e10
   loglik
 }
