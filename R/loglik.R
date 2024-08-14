@@ -120,9 +120,9 @@ dc_loglik <- function(data, z = "ATRTN", fns = list(
   imp_cases[i] <- imp_cases[i] | (lhs.P01s > 1 | lhs.logP11s > 0)
   imp_cases[j] <- imp_cases[j] | rhs.loglik.imp
   imp_cases[bth] <- imp_cases[bth] | (both.lhs.P11s > 1 | both.lhs.P01s > 1 | both.rhs.lik.imp )
-  if (any(imp_cases)) {
-    browser()
-  }
+  # if (any(imp_cases)) {
+  #   browser()
+  # }
   loglik[imp_cases] <- -1e10
   loglik
 }
