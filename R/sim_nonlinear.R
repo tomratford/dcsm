@@ -88,7 +88,7 @@ sim_nonlinear <- function(N = 300,
   u_12 <- runif(N,max = 1 - u_01)
   T_12s <- numeric(N)
   for (i in 1:N) {
-    if (is.na(T_01s[i]) || (!is.na(T_01s[i]) && !is.na(T_02s[i]) && T_02s[i] > T_01s[i])) {
+    if (is.na(T_01s[i]) || (!is.na(T_01s[i]) && !is.na(T_02s[i]) && T_02s[i] < T_01s[i])) {
       T_12s[i] <- NA
       next
     }
