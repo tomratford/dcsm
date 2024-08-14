@@ -74,7 +74,11 @@ joly.fit <- function(data,
 
                      if (debug)
                        print(penalty)
-                     res <- joly.ll(pars, data)
+                     res <- tryCatch(joly.ll(pars, data),
+                                     error = \(e) {
+                                       print(e)
+                                       return(-1e10)
+                                     })
                      if (debug)
                        print(res)
                      res - penalty
