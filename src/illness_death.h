@@ -53,10 +53,7 @@ public:
                      std::make_unique<NaturalCubicSpline>(gammas02, knots02, boundaries),
                      std::make_unique<NaturalCubicSpline>(gammas12, knots12, boundaries)) {}
 
-  vec P01Integrand(const vec& v, const vec& l, const vec& r, const vec& z) const {
-    vec u = exp(v);
-    return (P00(l, u, z) % spline01->dS(v) % exp(spline01->S(v)) % P11(u, r, z));
-  };
+  vec P01Integrand(const vec& v, const vec& l, const vec& r, const vec& z) const override;
 };
 
 class JolyPenalised : public IllnessDeath {

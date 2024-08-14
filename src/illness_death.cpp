@@ -6,6 +6,12 @@ using namespace arma;
 
 #include "illness_death.h"
 
+vec RoystonParmar::P01Integrand(const vec& v, const vec& l, const vec& r, const vec& z) const {
+  vec u = exp(v);
+  vec res = P00(l, u, z) % spline01->dS(v) % exp(spline01->S(v)) % exp(z*theta01) % P11(u, r, z);
+  return (res);
+};
+
 vec JolyPenalised::P01Integrand(const vec& u, const vec& l, const vec& r, const vec& z) const {
   return (P00(l, u, z) % spline01->intensity(u,z,theta01) % P11(u, r, z));
 };
