@@ -147,16 +147,23 @@ royston_parmar.fnBuilder <- function(theta01, theta02, theta12, gammas01, knots0
              gammas02, knots02,
              gammas12, knots12,
              boundaries)
-  fns$P01 <- \(l,r,z) P01(l,r,z,"RoystonParmar",
-                          theta01, theta02, theta12,
-                          gammas01, knots01,
-                          gammas02, knots02,
-                          gammas12, knots12,
-                          boundaries)
-  # fns$P01 <- Vectorize(\(l, r, z) integrate(
-  #   \(v) fns$P01Integrand(v, rep(l, length(v)), rep(r, length(v)), rep(z, length(v))),
-  #   lower = log(l),
-  #   upper = log(r)
-  # )$value)
+  # fns$P01 <- \(l,r,z) P01(l,r,z,"RoystonParmar",
+  #                         theta01, theta02, theta12,
+  #                         gammas01, knots01,
+  #                         gammas02, knots02,
+  #                         gammas12, knots12,
+  #                         boundaries)
+  fns$P01 <- Vectorize(\(l, r, z) tryCatch(integrate(
+    \(v) res <- fns$P01Integrand(v, rep(l, length(v)), rep(r, length(v)), rep(z, length(v))),
+    lower = log(max(l,1e-9)),
+    upper = log(r)
+  )$value,
+  error = \(e) {
+    print(e)
+    curve(fns$P01Integrand(x, rep(l, length(x)), rep(r, length(x)), rep(z, length(x))),
+          from = log(1e-9),
+          to=log(r))
+    stop()
+  }))
   fns
 }
