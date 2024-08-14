@@ -146,7 +146,7 @@ joly.fit <- function(data,
 #' @export
 #'
 #' @import dplyr
-#' @importFrom survival survfit Surv
+#' @importFrom survival survfit Surv coxph
 joly.initials <- function(data, k01, k02, k12) {
   # set initial list
   initials = list(
@@ -190,6 +190,10 @@ joly.initials <- function(data, k01, k02, k12) {
   cumhaz01 <- max(survfit(Surv(R, delta1) ~ 1, data)$cumhaz)
   cumhaz02 <- max(survfit(Surv(V, delta2) ~ 1, filter(data, delta1 == 0))$cumhaz)
   cumhaz12 <- max(survfit(Surv(V, delta2) ~ 1, filter(data, delta1 == 1))$cumhaz)
+
+  initials$theta01 <- unname(coxph(Surv(R,delta1) ~ ATRTN, data)$coef)
+  initials$theta02 <- unname(coxph(Surv(V,delta2) ~ ATRTN, filter(data, delta1 == 0))$coef)
+  initials$theta12 <- unname(coxph(Surv(V,delta2) ~ ATRTN, filter(data, delta1 == 1))$coef)
 
   initials$gammas01 <- rep((cumhaz01/(k01+4)), k01+4)
   initials$gammas02 <- rep((cumhaz02/(k02+4)), k02+4)
