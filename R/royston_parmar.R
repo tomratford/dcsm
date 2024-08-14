@@ -53,9 +53,9 @@ royston_parmar.initials <- function(data, k01, k02, k12) {
 
   # try to get sensible initial values
   # transition 01 values
-  data01 <- filter(data,delta1 == 1)
+  data01 <- filter(data,delta0 == 0)
   fit01 <- flexsurvspline(Surv(R, delta1) ~ ATRTN,
-                          knots = initials$knots,
+                          knots = initials$knots01,
                           bknots = initials$boundaries,
                           data=data01)
   coefs01 <- fit01$coef
@@ -63,9 +63,9 @@ royston_parmar.initials <- function(data, k01, k02, k12) {
   initials$theta01 <- coefs01[length(coefs01)]
 
   # transition 02 values
-  data02 <- filter(data, delta1 == 0 & delta2 == 1)
+  data02 <- filter(data, delta1 == 0)
   fit02 <- flexsurvspline(Surv(V, delta2) ~ ATRTN,
-                          knots = initials$knots,
+                          knots = initials$knots02,
                           bknots = initials$boundaries,
                           data=data02)
   coefs02 <- fit02$coef
@@ -73,9 +73,9 @@ royston_parmar.initials <- function(data, k01, k02, k12) {
   initials$theta02 <- coefs02[length(coefs02)]
 
   # transition 12 values
-  data12 <- filter(data, delta0 == 0 & delta2 == 1)
+  data12 <- filter(data, delta0 == 0)
   fit12 <- flexsurvspline(Surv(V, delta2) ~ ATRTN,
-                          knots = initials$knots,
+                          knots = initials$knots12,
                           bknots = initials$boundaries,
                           data=data12)
   coefs12 <- fit12$coef
