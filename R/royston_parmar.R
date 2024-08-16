@@ -92,6 +92,7 @@ royston_parmar.initials <- function(data, k01, k02, k12) {
   fit01 <- flexsurvspline(Surv(R, delta1) ~ ATRTN,
                           knots = initials$knots01,
                           bknots = initials$boundaries,
+                          spline = "splines2ns",
                           data=data01)
   coefs01 <- fit01$coef
   initials$gammas01 <- coefs01[-length(coefs01)]
@@ -102,6 +103,7 @@ royston_parmar.initials <- function(data, k01, k02, k12) {
   fit02 <- flexsurvspline(Surv(V, delta2) ~ ATRTN,
                           knots = initials$knots02,
                           bknots = initials$boundaries,
+                          spline = "splines2ns",
                           data=data02)
   coefs02 <- fit02$coef
   initials$gammas02 <- coefs02[-length(coefs02)]
@@ -112,6 +114,7 @@ royston_parmar.initials <- function(data, k01, k02, k12) {
   fit12 <- flexsurvspline(Surv(V, delta2) ~ ATRTN,
                           knots = initials$knots12,
                           bknots = initials$boundaries,
+                          spline = "splines2ns",
                           data=data12)
   coefs12 <- fit12$coef
   initials$gammas12 <- coefs12[-length(coefs12)]
