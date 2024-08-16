@@ -15,12 +15,12 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup}
-library(dcsm)
+devtools::load_all()
 library(survival)
 ```
 
-```{r simulate_data, eval=F}
-N <- 200
+```{r simulate_linear_data, eval=T}
+N <- 50
 
 # true values
 lambda01 <- 4
@@ -35,10 +35,11 @@ logS_t <- \(t,z) {
   -(lambda01*exp(z*theta01) + lambda02*exp(z*theta02))*t
 }
 
-No_visits <- 4
+No_visits <- 8
 
 mse <- matrix(nrow=N,ncol=2)
 colnames(mse) <- c("Illness-death", "Crude PFS")
+set.seed(123)
 for (i in 1:N) {
   dat <- sim_exp(N = 300,
                  lambda01,
@@ -49,6 +50,24 @@ for (i in 1:N) {
                  theta12,
                  K = No_visits)
   
+  # get KM error
+  km <- survfit(Surv(PFSDY, PFS) ~ ATRTN, data=dat)
+  km_resid <- exp(logS_t(km$time, c(rep(0,km$strata[1]),rep(1,km$strata[2])))) - km$surv
+  
+  fit <- weib.fit(dat,method = "Nelder-Mead")
+  fns <- do.call(weib.fnBuilder,as.list(fit$par))
+  
+  fitted <- fns$P00(0, dat$PFSDY, dat$ATRTN)
+  resid <-  exp(logS_t(dat$PFSDY, dat$ATRTN)) - fitted
+  mse[i,] <- c(mean(resid^2),mean(km_resid^2)) 
+}
+mse_weib_exp <- mse
+```
+
+```{r plot_linear_density}
+plot(density(mse_weib_exp[,1]))
+lines(density(mse_weib_exp[,2]), col="red")
+```
   # get KM error
   km <- survfit(Surv(PFSDY, PFS) ~ ATRTN, data=dat)
   km_resid <- logS_t(km$time, c(rep(0,km$strata[1]),rep(1,km$strata[2])))
