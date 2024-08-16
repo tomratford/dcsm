@@ -68,6 +68,44 @@ mse_weib_exp <- mse
 plot(density(mse_weib_exp[,1]))
 lines(density(mse_weib_exp[,2]), col="red")
 ```
+
+```{r simulate_nonlinear_data, eval=T}
+N <- 50
+
+# true values
+a01 <- \(x) x^(4/5)
+A01 <- \(x) (5/9)*x^(9/5)
+a02 <- \(x) 3*x/4
+A02 <- \(x) (3*(x^2))/8
+a12 <- \(x) (3*x/2)^(5/4)
+A12 <- \(x) ((2/3)^(3/4))*(x^(9/4))
+theta01 <- log(0.4)
+theta02 <- log(0.4)
+theta12 <- log(1)
+
+# true survivor function
+logS_t <- \(t,z) {
+  -(A01(t)*exp(z*theta01) + A02(t)*exp(z*theta02))
+}
+
+No_visits <- 8
+
+mse <- matrix(nrow=N,ncol=2)
+colnames(mse) <- c("Illness-death", "Crude PFS")
+set.seed(123)
+for (i in 1:N) {
+  dat <- sim_nonlinear(N = 300,
+                       a01,
+                       A02,
+                       a02,
+                       A02,
+                       a12,
+                       A12,
+                       theta01,
+                       theta02,
+                       theta12,
+                       K = No_visits)
+  
   # get KM error
   km <- survfit(Surv(PFSDY, PFS) ~ ATRTN, data=dat)
   km_resid <- logS_t(km$time, c(rep(0,km$strata[1]),rep(1,km$strata[2])))
@@ -80,9 +118,10 @@ lines(density(mse_weib_exp[,2]), col="red")
   resid <-  logS_t(dat$PFSDY, dat$ATRTN) - fitted
   mse[i,] <- c(mean(resid^2),mean(km_resid^2)) 
 }
+mse_weib_nonlinear <- mse
 ```
 
-```{r plot_density}
-plot(density(mse[,1]), xlim=c(0,1))
-lines(density(mse[,2]), col="red")
+```{r plot_nonlinear_density}
+plot(density(log(mse[,1])))
+lines(density(log(mse[,2])), col="red")
 ```
