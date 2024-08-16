@@ -3,7 +3,7 @@
 #' @param data Data set to fit to, must have entries as described in \link{dc_loglik}
 #' @param initial Vector of initial parameters
 #' @param control passed to \link{optim}, defaults to change the scale of the log-likelihood function
-#' @param method passed to \link{optim}, defaults to Nelder-Mead.
+#' @param method passed to \link{optim}, defaults to \code{"Nelder-Mead"}.
 #' @param ... additional parameters passed to \link{optim}
 #'
 #' @return A \link{optim} output
@@ -23,7 +23,7 @@ weib.fit <- function(data,
                      control = list(fnscale = -1),
                      method = "Nelder-Mead",
                      ...) {
-  optim(initial, weib.ll, data = data, control = control, ...)
+  optim(initial, weib.ll, data = data, control = control, method=method, ...)
 }
 
 #' Compute the log likelihood for a model with illness death and Weibull intensities
