@@ -50,20 +50,22 @@ dc_loglik <- function(data, z = "ATRTN", fns = list(
   if (any(i)) { # ensure we have at least one case
     lhs.P01s <- fnsP01(L[i], R[i], Z[i])
     lhs.logP11s <- fns$logP11(R[i], V[i], Z[i])
-    tryCatch({
-      lhs.logP01s <- log(lhs.P01s)
-      lhs.loglik <- lhs.logP01s + lhs.logP11s
-      nd_cnst <- which((i & dth)[i])
-    },
-    error = \(e) {
-      print(e)
-      browser()
-    })
+    suppressWarnings(
+      tryCatch({
+        lhs.logP01s <- log(lhs.P01s)
+        lhs.loglik <- lhs.logP01s + lhs.logP11s
+      },
+      error = \(e) {
+        print(e)
+        browser()
+      })
+    )
+    nd_cnst <- which((i & dth)[i])
     if (any(nd_cnst)) { # i.e. did they die and need the intensity added
       tryCatch(
         lhs.loglik[nd_cnst] <- lhs.loglik[nd_cnst] + log(fns$int12(V[nd_cnst], Z[nd_cnst])),
         warning = \(w) {
-          print(w)
+          #print(w) # subress NaNs
           # print(V[nd_cnst][which(is.nan(log(fns$int12(V[nd_cnst], Z[nd_cnst]))))])
           # curve(fns$int12(x,rep(0,length(x))), from=min(V[nd_cnst]),to=max(V[nd_cnst]))
           # curve(fns$int12(x,rep(1,length(x))), col="red", add=T)
@@ -81,7 +83,8 @@ dc_loglik <- function(data, z = "ATRTN", fns = list(
     rhs.loglik.imp <- rhs.loglik > 0
     nd_cnst2 <- which((j & dth)[j])
     if (any(nd_cnst2)) {
-      rhs.loglik[nd_cnst2] <- rhs.loglik[nd_cnst2] + log(fns$int02(V[nd_cnst2], Z[nd_cnst2]))
+      tryCatch({lhs.loglik[nd_cnst2] <- rhs.loglik[nd_cnst2] + log(fns$int02(V[nd_cnst2], Z[nd_cnst2]))},
+               warning = \(w) {})
     }
   } else
   {
