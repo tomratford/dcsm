@@ -25,8 +25,6 @@ newton_raphson <- function(f = \(x,z) (x-1)^2, df = \(x,z) 2*(x-1), z, t1 = 1) {
 }
 
 sim_nonlinear <- function(N = 300,
-                          K = 4,
-                          pct_no_prg = 0.05,
                           # baseline intensity functions
                           a01 = \(x) x^(4/5),
                           A01 = \(x) (5/9)*x^(9/5),
@@ -38,6 +36,8 @@ sim_nonlinear <- function(N = 300,
                           theta01 = log(0.4),
                           theta02 = log(0.4),
                           theta12 = log(1),
+                          K = 4,
+                          pct_no_prg = 0.05,
                           silent=T) {
   # helper functions (these are)
   P00 <- \(x,z) exp(-A01(x)*exp(z*theta01) - A02(x)*exp(z*theta02))
