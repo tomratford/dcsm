@@ -22,10 +22,7 @@ vec NaturalCubicSpline::S(const vec &x) const {
 
 vec NaturalCubicSpline::dS(const vec &x) const {
   NaturalSpline spline(x, knots, boundaries);
-  // We do not want to include the intercept, force out using gammas
-  vec gammas_(gammas);
-  gammas_(0) = 0;
-  vec product = spline.derivative() * gammas_;
+  vec product = spline.derivative() * gammas;
   product.replace(datum::nan, -datum::inf); // Working under the assumption that NaN => x = -inf => t = 0
   return (product);
 }
