@@ -37,12 +37,13 @@ weib.ll <- function(p, data) {
   if (any(p[startsWith(names(p), "lambda")] < 0) || any(p[startsWith(names(p), "gamma")] < 0)) {
     return(-1e10)
   }
-  dc_loglik(data,
+  logliks <- dc_loglik(data,
             fns = do.call(
               weib.fnBuilder,
               as.list(p)
-            )) |>
-    sum()
+            ))
+  logliks[!is.finite(logliks)] <- -1e10 #Avoid non-finite differences
+  sum(logliks)
 }
 
 #' Functions for a illness-death model with Weibull intensities
@@ -182,7 +183,12 @@ weib.P01 <- function(lambda01,
 
   Vectorize(function(l, r, z) {
     factor <- gamma01 * lambda01 * exp(cumint01(l,z) + cumint02(l,z) - cumint12(r,z)) * exp(z*theta01)
-    int <- integrate(\(v) exp(v)^(gamma01) * exp(cumint12(exp(v),z) - cumint01(exp(v),z) - cumint02(exp(v),z)), log(l), log(r))
+    int <- try(integrate(\(v) exp(v) ^ (gamma01) * exp(cumint12(exp(v), z) - cumint01(exp(v), z) - cumint02(exp(v), z)),
+                         log(l),
+                         log(r)), silent = T)
+    if (class(int) == "try-error") {
+      return(-1e10)
+    }
     int$value * factor
   })
 }
