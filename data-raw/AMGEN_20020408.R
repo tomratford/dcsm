@@ -66,6 +66,9 @@ addc <- adsl %>%
     ATRTN = case_match(ATRT, "Best supportive care" ~ 0, .default = 1)
   )
 
-AMGEN_20020408 <- addc
+AMGEN_20020408 <- addc %>%
+  mutate(L = L / 365.25,
+         R = R / 365.25,
+         V = V / 365.25)
 
 usethis::use_data(AMGEN_20020408, overwrite = TRUE)
