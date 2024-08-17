@@ -9,7 +9,9 @@
 #' @param kappa01 Penalty parameter for the 0 -> 1 transition
 #' @param kappa02 Penalty parameter for the 0 -> 1 transition
 #' @param kappa12 Penalty parameter for the 0 -> 1 transition
+#' @param compute_cross Compute the cross value (and relevant hessians)? EXPENSIVE!
 #' @param debug Print every imputation?
+#' @param initials optional list of initial values to replace call to \link{joly.initials}
 #'
 #' @return A \code{optim} object.
 #' @export
@@ -20,6 +22,7 @@ joly.fit <- function(data,
                      kappa01 = 1,
                      kappa02 = 1,
                      kappa12 = 1,
+                     compute_cross = T,
                      debug = F,
                      initials = NULL) {
   if (is.null(initials))
@@ -85,53 +88,55 @@ joly.fit <- function(data,
                    },
                    control = list(fnscale = -1),
                    method = "Nelder-Mead")
-  opt_out$hessian <- optimHess(opt_out$par,
-                               \(p) {
-                                 pars <- make_pars2(p, initials)
+  if (compute_cross) {
+    opt_out$hessian <- optimHess(opt_out$par,
+                                 \(p) {
+                                   pars <- make_pars2(p, initials)
 
-                                 spline01 <- new(CubicISpline,
-                                                 pars$gammas01,
-                                                 pars$knots01,
-                                                 pars$boundaries)
-                                 spline02 <- new(CubicISpline,
-                                                 pars$gammas02,
-                                                 pars$knots02,
-                                                 pars$boundaries)
-                                 spline12 <- new(CubicISpline,
-                                                 pars$gammas12,
-                                                 pars$knots12,
-                                                 pars$boundaries)
+                                   spline01 <- new(CubicISpline,
+                                                   pars$gammas01,
+                                                   pars$knots01,
+                                                   pars$boundaries)
+                                   spline02 <- new(CubicISpline,
+                                                   pars$gammas02,
+                                                   pars$knots02,
+                                                   pars$boundaries)
+                                   spline12 <- new(CubicISpline,
+                                                   pars$gammas12,
+                                                   pars$knots12,
+                                                   pars$boundaries)
 
-                                 # Get penalties
-                                 penalty01 <- integrate(
-                                   \(x) spline01$dS2(x) ^ 2,
-                                   lower = pars$boundaries[1],
-                                   upper = pars$boundaries[2]
-                                 )$value
-                                 penalty02 <- integrate(
-                                   \(x) spline02$dS2(x) ^ 2,
-                                   lower = pars$boundaries[1],
-                                   upper = pars$boundaries[2]
-                                 )$value
-                                 penalty12 <- integrate(
-                                   \(x) spline12$dS2(x) ^ 2,
-                                   lower = pars$boundaries[1],
-                                   upper = pars$boundaries[2]
-                                 )$value
-                                 penalty <- kappa01 * penalty01 + kappa02 * penalty02 + kappa12 * penalty12
+                                   # Get penalties
+                                   penalty01 <- integrate(
+                                     \(x) spline01$dS2(x) ^ 2,
+                                     lower = pars$boundaries[1],
+                                     upper = pars$boundaries[2]
+                                   )$value
+                                   penalty02 <- integrate(
+                                     \(x) spline02$dS2(x) ^ 2,
+                                     lower = pars$boundaries[1],
+                                     upper = pars$boundaries[2]
+                                   )$value
+                                   penalty12 <- integrate(
+                                     \(x) spline12$dS2(x) ^ 2,
+                                     lower = pars$boundaries[1],
+                                     upper = pars$boundaries[2]
+                                   )$value
+                                   penalty <- kappa01 * penalty01 + kappa02 * penalty02 + kappa12 * penalty12
 
-                                 res <- joly.ll(pars, data)
-                                 res - penalty
-                               },
-                               control = list(fnscale = -1))
-  opt_out$hessian2 <- optimHess(opt_out$par,
-                                \(p) {
-                                  pars <- make_pars2(p, initials)
-                                  res <- joly.ll(pars, data)
-                                  res
-                                },
-                                control = list(fnscale = -1))
-  opt_out$cross_value <- joly.ll(make_pars2(opt_out$par,initials),dat) - sum(diag(solve(opt_out$hessian)%*%opt_out$hessian2))
+                                   res <- joly.ll(pars, data)
+                                   res - penalty
+                                 },
+                                 control = list(fnscale = -1))
+    opt_out$hessian2 <- optimHess(opt_out$par,
+                                  \(p) {
+                                    pars <- make_pars2(p, initials)
+                                    res <- joly.ll(pars, data)
+                                    res
+                                  },
+                                  control = list(fnscale = -1))
+    opt_out$cross_value <- joly.ll(make_pars2(opt_out$par,initials),data) - sum(diag(solve(opt_out$hessian)%*%opt_out$hessian2))
+  }
   opt_out
 }
 
