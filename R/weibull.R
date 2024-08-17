@@ -76,8 +76,9 @@ weib.fnBuilder <- function(lambda01,
                            theta12) {
   args <- as.list(environment()) # helpful for debugging
   rtn <- list(
-    int12 = weib.int(lambda12, gamma12, theta12),
+    int01 = weib.int(lambda01, gamma01, theta01),
     int02 = weib.int(lambda02, gamma02, theta02),
+    int12 = weib.int(lambda12, gamma12, theta12),
     P00 = weib.P00(lambda01, gamma01, theta01, lambda02, gamma02, theta02),
     logP00 = weib.logP00(lambda01, gamma01, theta01, lambda02, gamma02, theta02),
     P01 = weib.P01(
