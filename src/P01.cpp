@@ -75,7 +75,7 @@ vec P01(vec &l, vec &r, vec &z, String type, double theta01_, double theta02_,
     if (err_code > 0) {
       switch (err_code) {
       case 2:
-        std::cout << "WARNING: Roundoff error, result = " << res(i) << " error estimate = " << err_est << "\n";
+        //std::cout << "WARNING: Roundoff error, result = " << res(i) << " error estimate = " << err_est << "\n";
         res(i) = -1e10;
         break;
       default:
