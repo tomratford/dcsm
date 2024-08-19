@@ -24,7 +24,10 @@ joly.fit <- function(data,
                      kappa12 = 1,
                      compute_cross = T,
                      debug = F,
-                     initials = NULL) {
+                     initials = NULL,
+                     control = list(fnscale = -1, maxit=500),
+                     method = "BFGS",
+                     ...) {
   if (is.null(initials))
     initials <- joly.initials(data, k01, k02, k12)
   p_init <- unlist(initials[c("theta01",
@@ -86,8 +89,9 @@ joly.fit <- function(data,
                        print(res)
                      res - penalty
                    },
-                   control = list(fnscale = -1),
-                   method = "Nelder-Mead")
+                   control = control,
+                   method = method,
+                   ...)
   if (compute_cross) {
     opt_out$hessian <- optimHess(opt_out$par,
                                  \(p) {
@@ -221,6 +225,7 @@ joly.ll <- function(p, data, indiv=FALSE) {
                      joly.fnBuilder,
                      p
                    ))
+  lik[lik == -Inf] <- -1e10 # avoid non-finite diff
   if (indiv) {
     return(lik)
   } else {
@@ -271,10 +276,19 @@ joly.fnBuilder <- function(theta01, theta02, theta12, gammas01, knots01, gammas0
                           gammas02, knots02,
                           gammas12, knots12,
                           boundaries)
-  # fns$P01 <- Vectorize(\(l, r, z) integrate(
-  #   \(v) res <- fns$P01Integrand(v, rep(l, length(v)), rep(r, length(v)), rep(z, length(v))),
-  #   lower = l,
-  #   upper = r
-  # )$value)
+  # fns$P01 <- Vectorize(\(l, r, z) tryCatch(
+  #   integrate(
+  #     \(u) res <- fns$P01Integrand(u, rep(l, length(u)), rep(r, length(u)), rep(z, length(u))),
+  #     lower = l,
+  #     upper = r
+  #   )$value,
+  #   error = \(e) {
+  #     print(e$message)
+  #     curve(fns$P01Integrand(x, rep(l, length(x)), rep(r, length(x)), rep(z, length(x))),
+  #           from = l,
+  #           to = r)
+  #     stop()
+  #   }
+  # ))
   fns
 }

@@ -20,8 +20,8 @@ weib.fit <- function(data,
                        "gamma12" = 1,
                        "theta12" = 0
                      ),
-                     control = list(fnscale = -1),
-                     method = "Nelder-Mead",
+                     control = list(fnscale = -1, maxit=500),
+                     method = "BFGS",
                      ...) {
   optim(initial, weib.ll, data = data, control = control, method=method, ...)
 }
