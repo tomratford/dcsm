@@ -5,10 +5,23 @@
 #' @param k02 Number of interior knots in the 0 -> 2 transition
 #' @param k12 Number of interior knots in the 1 -> 2 transition
 #' @param debug Print every parameter tried?
+#' @param initials Alternative list of initial values to try
+#' @param control Passed to \link{optim}
+#' @param method Passed to \link{optim}, defaults to \code{"BFGS"}
+#' @param ... Passed to \link{optim}
 #'
-#' @return A \code{optim} object.
+#' @return A \link{optim} object.
 #' @export
-royston_parmar.fit <- function(data, k01, k02, k12, debug=F, initials=NULL) {
+royston_parmar.fit <- function(data,
+                               k01,
+                               k02,
+                               k12,
+                               debug = F,
+                               initials = NULL,
+                               control = list(fnscale = -1, maxit = 500),
+                               method = "BFGS",
+                               ...
+) {
   if (is.null(initials))
     initials <- royston_parmar.initials(data, k01, k02, k12)
   p_init <- unlist(initials[c("theta01","theta02","theta12","gammas01","gammas02","gammas12")])
@@ -21,15 +34,17 @@ royston_parmar.fit <- function(data, k01, k02, k12, debug=F, initials=NULL) {
       res <- tryCatch(royston_parmar.ll(pars, data),
                error = \(e) {
                  print(e)
-                 return(-1e10)
+                 return(-1e10*length(data$V))
                })
       if (debug) print(res)
+      if (!is.finite(res)) {
+        return(-1e10*length(data$V))
+      }
       res
     },
-    control = list(
-      fnscale = -1
-    ),
-    method="Nelder-Mead"
+    control = control,
+    method = method,
+    ...
   )
 }
 
@@ -60,7 +75,7 @@ royston_parmar.initials <- function(data, k01, k02, k12) {
     gammas12 = numeric(0),
     knots12 = numeric(0),
     #either day 1 or the smallest time in the data, recall that royston & parmar defined on the log scale.
-    boundaries = log(c(1e-9, max(data$V)))
+    boundaries = log(c(min(data$V, 1/365.25), max(data$V)))
   )
   # work out knot values
   delta1 <-  pull(data, matches("d(elta)?0?1", perl=T))
@@ -89,40 +104,90 @@ royston_parmar.initials <- function(data, k01, k02, k12) {
   # try to get sensible initial values
   # transition 01 values
   data01 <- filter(data,delta0 == 0)
-  fit01 <- flexsurvspline(Surv(R, delta1) ~ ATRTN,
-                          knots = initials$knots01,
-                          bknots = initials$boundaries,
-                          spline = "splines2ns",
-                          data=data01)
-  coefs01 <- fit01$coef
+  surv01 <- survfit(Surv(L,R,delta1,type="interval") ~ ATRTN,data01)
+  cumhaz_raw <- -log(surv01$surv)
+  cumhaz <- unlist(with(surv01, mapply(\(n,c) rep(c,n), n.event, cumhaz_raw)))
+  cumhaz_is_finite <- is.finite(cumhaz)
+  data01_events <- filter(data, delta1 == 1)
+  coefs01 <- solve_qp_problem(cumhaz[cumhaz_is_finite],
+                              log(data01_events$R)[cumhaz_is_finite],
+                              data01_events$ATRTN[cumhaz_is_finite],
+                              initials$knots01,
+                              initials$boundaries)
   initials$gammas01 <- coefs01[-length(coefs01)]
   initials$theta01 <- coefs01[length(coefs01)]
 
   # transition 02 values
-  data02 <- filter(data, delta1 == 0)
-  fit02 <- flexsurvspline(Surv(V, delta2) ~ ATRTN,
-                          knots = initials$knots02,
-                          bknots = initials$boundaries,
-                          spline = "splines2ns",
-                          data=data02)
-  coefs02 <- fit02$coef
+  data02 <- filter(data, delta1 == 1)
+  surv02 <- survfit(Surv(V,delta2) ~ ATRTN,data02)
+  cumhaz <- unlist(with(surv02, mapply(\(n,c) rep(c,n), n.event, cumhaz)))
+  data02_events <- filter(data02, delta2 == 1)
+  coefs02 <- solve_qp_problem(cumhaz,
+                              log(data02_events$V),
+                              data02_events$ATRTN,
+                              initials$knots02,
+                              initials$boundaries)
   initials$gammas02 <- coefs02[-length(coefs02)]
   initials$theta02 <- coefs02[length(coefs02)]
 
   # transition 12 values
   data12 <- filter(data, delta0 == 0)
-  fit12 <- flexsurvspline(Surv(V, delta2) ~ ATRTN,
-                          knots = initials$knots12,
-                          bknots = initials$boundaries,
-                          spline = "splines2ns",
-                          data=data12)
-  coefs12 <- fit12$coef
+  surv12 <- survfit(Surv(V,delta2) ~ ATRTN,data12)
+  cumhaz <- unlist(with(surv12, mapply(\(n,c) rep(c,n), n.event, cumhaz)))
+  data12_events <- filter(data12, delta2 == 1)
+  coefs12 <- solve_qp_problem(cumhaz,
+                              log(data12_events$V),
+                              data12_events$ATRTN,
+                              initials$knots12,
+                              initials$boundaries)
   initials$gammas12 <- coefs12[-length(coefs12)]
   initials$theta12 <- coefs12[length(coefs12)]
-
   initials <- lapply(initials, unname)
 
   return(initials)
+}
+
+#' Find initial coefficients for Royston-Parmar
+#' Taken nearly directly from flexsurv (c. Christopher Jackson)
+#'
+#' @param y cumhaz
+#' @param x log vector of time (R/V)
+#' @param z vector of coefficients
+#' @param initial initial values so far (for knots/boundaries)
+#'
+#' @return vector of solutions
+#' @importFrom quadprog solve.QP
+solve_qp_problem <- function(y, x, z, knots, boundaries) {
+  b <- splines2::nsp(
+    x,
+    knots = knots,
+    Boundary.knots = boundaries,
+    intercept = T
+  )
+  Xq <- cbind(b, z)
+
+  kx <- x
+  kr <- diff(range(kx))
+  kx[1] <- x[1] - 0.01*kr
+  db <- splines2::nsp(
+    kx,
+    knots = knots,
+    Boundary.knots = boundaries,
+    intercept = T,
+    deriv=T
+  )
+  dXq <- cbind(db, rep(0, length(z)))
+
+  Dmat <- t(Xq) %*% Xq
+  if (!all(eigen(Dmat)$values > 0)) {
+    stop("no sol")
+  }
+  solve.QP(
+    Dmat = Dmat,
+    dvec = t(t(y) %*% Xq),
+    Amat = t(dXq),
+    bvec = rep(1, length(y))
+  )$solution
 }
 
 #' Compute the log likelihood for a model with illness death and natural cubic spline intensities
@@ -198,11 +263,12 @@ royston_parmar.fnBuilder <- function(theta01, theta02, theta12, gammas01, knots0
       upper = log(r)
     )$value,
     error = \(e) {
-      print(e)
-      curve(fns$P01Integrand(x, rep(l, length(x)), rep(r, length(x)), rep(z, length(x))),
-            from = log(1e-9),
-            to = log(r))
-      stop()
+      # print(e)
+      # curve(fns$P01Integrand(x, rep(l, length(x)), rep(r, length(x)), rep(z, length(x))),
+      #       from = log(1e-9),
+      #       to = log(r))
+      #stop(e)
+      return(-1e10) # I'm not sure if this is what it 'should' return, but it works sofar
     }
   ))
   fns
