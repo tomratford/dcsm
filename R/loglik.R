@@ -83,7 +83,7 @@ dc_loglik <- function(data, z = "ATRTN", fns = list(
     rhs.loglik.imp <- rhs.loglik > 0
     nd_cnst2 <- which((j & dth)[j])
     if (any(nd_cnst2)) {
-      tryCatch({lhs.loglik[nd_cnst2] <- rhs.loglik[nd_cnst2] + log(fns$int02(V[nd_cnst2], Z[nd_cnst2]))},
+      tryCatch({rhs.loglik[nd_cnst2] <- rhs.loglik[nd_cnst2] + log(fns$int02(V[j][nd_cnst2], Z[j][nd_cnst2]))},
                warning = \(w) {})
     }
   } else
@@ -98,12 +98,12 @@ dc_loglik <- function(data, z = "ATRTN", fns = list(
   both.lhs.lik <- both.lhs.P01s * both.lhs.P11s
 
   both.rhs.lik <- fns$P00(L[bth], V[bth], Z[bth])
-  both.rhs.lik.imp <- both.rhs.lik > 1
+  both.rhs.lik.imp <- both.rhs.lik > 1 #impossible case
 
   nd_cnst3 <- which((bth & dth)[bth])
   if (any(nd_cnst3)) {
-    both.lhs.lik[nd_cnst3] <- both.lhs.lik[nd_cnst3] * fns$int12(V[nd_cnst3], Z[nd_cnst3])
-    both.rhs.lik[nd_cnst3] <- both.rhs.lik[nd_cnst3] * fns$int02(V[nd_cnst3], Z[nd_cnst3])
+    both.lhs.lik[nd_cnst3] <- both.lhs.lik[nd_cnst3] * fns$int12(V[bth][nd_cnst3], Z[bth][nd_cnst3])
+    both.rhs.lik[nd_cnst3] <- both.rhs.lik[nd_cnst3] * fns$int02(V[bth][nd_cnst3], Z[bth][nd_cnst3])
   }
   both.lik <- both.lhs.lik + both.rhs.lik
   # in some cases we have negative probability
