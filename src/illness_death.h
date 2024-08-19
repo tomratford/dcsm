@@ -27,7 +27,7 @@ class IllnessDeath {
     return (spline02->intensity(t, z, theta02));
   }
   vec int12(const vec &t, const vec &z) const {
-    return (spline12->intensity(t, z, theta02));
+    return (spline12->intensity(t, z, theta12));
   }
   vec logP00(const vec &l, const vec &r, const vec &z) const {
     return (spline01->minus_Intensity(l,r,z,theta01) +
