@@ -46,7 +46,7 @@ sim_exp <- function(N = 300,
                     # %s under certain conditions
                     pct_no_prg = 0.05,
                     # # of visits
-                    K = 4) {
+                    K = 8) {
   # Assign treatment arm
   Zs <- rbinom(N, 1, 0.5)
 

@@ -36,7 +36,7 @@ sim_nonlinear <- function(N = 300,
                           theta01 = log(0.4),
                           theta02 = log(0.4),
                           theta12 = log(1),
-                          K = 4,
+                          K = 8,
                           pct_no_prg = 0.05,
                           silent=T) {
   # helper functions (these are)
