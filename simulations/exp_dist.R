@@ -61,6 +61,11 @@ run_simulation <- function(unused) {
     royston_error <- exp(logS_t(dat$PFSDY, dat$ATRTN)) - joly$P00(rep(0,length(dat$PFSDY)), dat$PFSDY, dat$ATRTN)
   }
 
+  #basic debugging
+  cat("Completed Sim #")
+  cat(unused)
+  cat("\n")
+
   c("CoxMSE" = mean(cox_error^2),
     "CoxTheta" = unname(cox_mod$coef),
     "WeibMSE" = mean(weib_error^2),
