@@ -121,9 +121,10 @@ sim_exp <- function(N = 300,
   }
   Rs[hack] <- Vs[hack]
 
-  # potential known not progressed
-  potentials <- which(delta0 == 0 & delta1 == 0)
-  delta0[sample(potentials, ceiling(pct_no_prg * length(potentials)))] <- 1
+  # randomly allocate possible delta0s
+  potentials <- sample(c(TRUE,FALSE), N, T, c(pct_no_prg,1 - pct_no_prg))
+  known_not_prog <- potentials & delta1 == 0
+  delta0[known_not_prog] <- 1
 
   # get crude pfs time
   pfs_event <- as.numeric(delta1 | delta2)
