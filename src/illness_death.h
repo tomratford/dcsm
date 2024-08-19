@@ -20,6 +20,9 @@ class IllnessDeath {
       : theta01(theta01_), theta02(theta02_), theta12(theta12_),
     spline01(std::move(spline01_)), spline02(std::move(spline02_)), spline12(std::move(spline12_)) {}
 
+  vec int01(const vec &t, const vec &z) const {
+    return (spline01->intensity(t, z, theta01));
+  }
   vec int02(const vec &t, const vec &z) const {
     return (spline02->intensity(t, z, theta02));
   }

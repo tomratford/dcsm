@@ -60,7 +60,7 @@ royston_parmar.initials <- function(data, k01, k02, k12) {
     gammas12 = numeric(0),
     knots12 = numeric(0),
     #either day 1 or the smallest time in the data, recall that royston & parmar defined on the log scale.
-    boundaries = log(c(min(data$V, 1 / 365.25), max(data$V)))
+    boundaries = log(c(1e-9, max(data$V)))
   )
   # work out knot values
   delta1 <-  pull(data, matches("d(elta)?0?1", perl=T))

@@ -35,6 +35,7 @@ IllnessDeath* MakeIllnessDeath(String type, double theta01_, double theta02_, do
 RCPP_MODULE(illness_death_mod) {
   class_<IllnessDeath>("IllnessDeath")
     .factory<String, double, double, double, const vec&, const vec&, const vec&, const vec&, const vec&, const vec&, const vec&>(MakeIllnessDeath)
+    .method("int01", &IllnessDeath::int01)
     .method("int02", &IllnessDeath::int02)
     .method("int12", &IllnessDeath::int12)
     .method("logP00", &IllnessDeath::logP00)
