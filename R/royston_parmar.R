@@ -59,8 +59,7 @@ royston_parmar.fit <- function(data,
 #' @export
 #'
 #' @import dplyr
-#' @importFrom flexsurv flexsurvspline
-#' @importFrom survival Surv
+#' @importFrom survival Surv survfit
 #' @importFrom splines2 nsp
 royston_parmar.initials <- function(data, k01, k02, k12) {
   # set initial list
