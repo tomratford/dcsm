@@ -69,7 +69,7 @@ plot.dcsm_mod <- function(x,
 #' @importFrom splines2 nsp isp
 dcsm_se <- function(x, fns) {
   if (!exists("hessian", weib_mod)) {
-    stop("Hessian required, rerun with `hessian=T`")
+    stop("Hessian required, rerun model fitting with `hessian=T`")
   }
   Io <- solve(-x$hessian)
   switch(
