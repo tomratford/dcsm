@@ -92,6 +92,8 @@ joly.fit <- function(data,
                    control = control,
                    method = method,
                    ...)
+  opt_out$loglik <- joly.ll(make_pars2(opt_out$par, initials), data)
+  opt_out$AIC <- 2*((15 + k01 + k02 + k12) - opt_out$loglik)
   if (compute_cross) {
     opt_out$hessian <- optimHess(opt_out$par,
                                  \(p) {
@@ -139,8 +141,11 @@ joly.fit <- function(data,
                                     res
                                   },
                                   control = list(fnscale = -1))
-    opt_out$cross_value <- joly.ll(make_pars2(opt_out$par,initials),data) - sum(diag(solve(opt_out$hessian)%*%opt_out$hessian2))
+    opt_out$cross_value <- opt_out$loglik - sum(diag(solve(opt_out$hessian)%*%opt_out$hessian2))
   }
+  attr(opt_out, "dist") <- "joly"
+  attr(opt_out, "initials") <- initials
+  class(opt_out) <- c("dcsm_mod")
   opt_out
 }
 

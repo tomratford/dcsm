@@ -23,7 +23,10 @@ weib.fit <- function(data,
                      control = list(fnscale = -1, maxit=500),
                      method = "BFGS",
                      ...) {
-  optim(initial, weib.ll, data = data, control = control, method=method, ...)
+  opt_out <- optim(initial, weib.ll, data = data, control = control, method=method, ...)
+  attr(opt_out, "dist") <- "weibull"
+  class(opt_out) <- c("dcsm_mod")
+  opt_out
 }
 
 #' Compute the log likelihood for a model with illness death and Weibull intensities

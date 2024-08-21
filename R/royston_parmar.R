@@ -26,7 +26,7 @@ royston_parmar.fit <- function(data,
     initials <- royston_parmar.initials(data, k01, k02, k12)
   p_init <- unlist(initials[c("theta01","theta02","theta12","gammas01","gammas02","gammas12")])
   if (debug) print(initials)
-  optim(
+  opt_out <- optim(
     unlist(p_init),
     \(p) {
       pars <- make_pars2(p,initials)
@@ -46,6 +46,10 @@ royston_parmar.fit <- function(data,
     method = method,
     ...
   )
+  attr(opt_out, "dist") <- "royston_parmar"
+  attr(opt_out, "initials") <- initials
+  class(opt_out) <- c("dcsm_mod")
+  opt_out
 }
 
 #' Get a set of (hopefully) feasible inital values for a Natural Cubic Spline based model
