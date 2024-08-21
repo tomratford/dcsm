@@ -47,15 +47,37 @@ plot.dcsm_mod <- function(x,
   }
   curve(fns$P00(rep(0, length(x)), x, rep(0, length(x))), add = add, ...)
   if (CI) {
-    curve(fns$P00(rep(0, length(x)), x, rep(0, length(x))) + qnorm(0.975) * se(x, 0), add = T, lty=2, ...)
-    curve(fns$P00(rep(0, length(x)), x, rep(0, length(x))) - qnorm(0.975) * se(x, 0), add = T, lty=2, ...)
+    curve(
+      fns$P00(rep(0, length(x)), x, rep(0, length(x))) + qnorm(0.975) * se(x, 0),
+      add = T,
+      lty = 2,
+      ...
+    )
+    curve(
+      fns$P00(rep(0, length(x)), x, rep(0, length(x))) - qnorm(0.975) * se(x, 0),
+      add = T,
+      lty = 2,
+      ...
+    )
   }
   if (!is.null(treat_col)) {
     curve(fns$P00(rep(0, length(x)), x, rep(1, length(x))), add = T, col =
             treat_col, ...)
     if (CI) {
-      curve(fns$P00(rep(0, length(x)), x, rep(1, length(x))) + qnorm(0.975) * se(x, 1), add = T, lty=2, ...)
-      curve(fns$P00(rep(0, length(x)), x, rep(1, length(x))) - qnorm(0.975) * se(x, 1), add = T, lty=2, ...)
+      curve(
+        fns$P00(rep(0, length(x)), x, rep(1, length(x))) + qnorm(0.975) * se(x, 1),
+        add = T,
+        lty = 2,
+        col = treat_col,
+        ...
+      )
+      curve(
+        fns$P00(rep(0, length(x)), x, rep(1, length(x))) - qnorm(0.975) * se(x, 1),
+        add = T,
+        lty = 2,
+        col = treat_col,
+        ...
+      )
     }
   }
 }
