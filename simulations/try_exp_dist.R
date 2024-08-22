@@ -20,9 +20,9 @@ while (TRUE) {
   pvals <- vector("numeric", 3)
   possible_rknots <- vector("list", 3)
 
-  possible_rknots[[1]] <- rknots - c(1, 0, 0)
-  possible_rknots[[2]] <- rknots - c(0, 1, 0)
-  possible_rknots[[3]] <- rknots - c(0, 0, 1)
+  possible_rknots[[1]] <- rknots + c(1, 0, 0)
+  possible_rknots[[2]] <- rknots + c(0, 1, 0)
+  possible_rknots[[3]] <- rknots + c(0, 0, 1)
 
   possible_mods <- parallel::mclapply(possible_rknots, fit_royston, mc.cores = 16)
 
