@@ -14,6 +14,7 @@ royston_mod <- fit_royston(rknots)
 history_royston_mods <- list(royston_mod)
 history_rknots <- list(rknots)
 history_pvals <- c()
+print("Model fitting starts now")
 while (TRUE) {
   possible_mods <- vector("list", 3)
   pvals <- vector("numeric", 3)
@@ -48,6 +49,7 @@ while (TRUE) {
 
   if (any(pvals >= 0.05)) {
     replace <- which(max(pvals) == pvals)
+    print(possible_rknots[[replace]])
     royston_mod <- possible_mods[[replace]]
     rknots <- possible_rknots[[replace]]
     history_royston_mods[length(history_royston_mods) + 1] <- royston_mod
