@@ -33,8 +33,8 @@ while (TRUE) {
     replace <- which(max(pvals) == pvals)
     royston_mod <- possible_mods[[replace]]
     rknots <- possible_rknots[[replace]]
-    history_royston_mods[length(history_royston_mods) + 1] <- royston_mod
-    history_rknots[length(history_rknots) + 1] <- rknots
+    history_royston_mods[[length(history_royston_mods) + 1]] <- royston_mod
+    history_rknots[[length(history_rknots) + 1]] <- rknots
     history_pvals <- c(history_pvals, pvals[[replace]])
   } else {
     break
