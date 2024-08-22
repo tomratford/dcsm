@@ -10,4 +10,4 @@ fit_royston <- function(i) {
   v
 }
 
-parallel::mclapply(1:27, fit_royston, mc.cores = 16)
+results <- parallel::mclapply(1:27, fit_royston, mc.cores = 16)
