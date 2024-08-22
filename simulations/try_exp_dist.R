@@ -26,28 +26,9 @@ while (TRUE) {
 
   possible_mods <- parallel::mclapply(possible_rknots, fit_royston, mc.cores = 16)
 
-  if (all(possible_rknots[[1]] >= 0)) {
-    Tstat <- 2 * (royston_mod$value - possible_mods[[1]]$value)
-    pvals[1] <- pchisq(Tstat, 1)
-  } else {
-    pvals[1] <- 0
-  }
+  values <- sapply(possible_mods, \(x) x$value)
+  pvals <- pchisq(2*(values - royston_mod$value),1)
 
-  if (all(possible_rknots[[2]] >= 0)) {
-    Tstat <- 2 * (royston_mod$value - possible_mods[[2]]$value)
-    pvals[2] <- pchisq(Tstat, 1)
-  } else {
-    pvals[2] <- 0
-  }
-
-  if (all(possible_rknots[[3]] >= 0)) {
-    Tstat <- 2 * (royston_mod$value - possible_mods[[3]]$value)
-    pvals[3] <- pchisq(Tstat, 1)
-  } else {
-    pvals[3] <- 0
-  }
-
-  print(pvals)
   if (any(pvals >= 0.05)) {
     replace <- which(max(pvals) == pvals)
     royston_mod <- possible_mods[[replace]]
