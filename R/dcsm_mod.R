@@ -25,6 +25,7 @@ plot.dcsm_mod <- function(x,
                           treat_col = "blue",
                           add = F,
                           CI = F,
+                          tol = 1e-20,
                           ...) {
   if (attr(x, "dist") == "weibull") {
     pars <- as.list(x$par)
@@ -43,7 +44,7 @@ plot.dcsm_mod <- function(x,
     stop("Invalid distribution in object")
   )
   if (CI) {
-    se <- dcsm_se(x, fns)
+    se <- dcsm_se(x, fns, tol)
   }
   curve(fns$P00(rep(0, length(x)), x, rep(0, length(x))), add = add, ...)
   if (CI) {
@@ -89,11 +90,11 @@ plot.dcsm_mod <- function(x,
 #'
 #' @return A function to find the standard error at time \code{tm} with treatment arm \code{z}.
 #' @importFrom splines2 nsp isp
-dcsm_se <- function(x, fns) {
+dcsm_se <- function(x, fns, tol=NULL) {
   if (!exists("hessian", weib_mod)) {
     stop("Hessian required, rerun model fitting with `hessian=T`")
   }
-  Io <- solve(-x$hessian)
+  Io <- solve(-x$hessian, tol=tol)
   switch(
     attr(x, "dist"),
     "weibull" = function(tm, z = 0) {
