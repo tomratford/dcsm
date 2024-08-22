@@ -46,11 +46,11 @@ run_simulation <- function(unused) {
     joly_error <- NA
   } else {
     joly_fns <- do.call(joly.fnBuilder, make_pars2(joly_fit$par, joly.initials(dat,0,0,0)))
-    joly_error <- exp(logS_t(dat$PFSDY, dat$ATRTN)) - joly$P00(rep(0,length(dat$PFSDY)), dat$PFSDY, dat$ATRTN)
+    joly_error <- exp(logS_t(dat$PFSDY, dat$ATRTN)) - joly_fns$P00(rep(0,length(dat$PFSDY)), dat$PFSDY, dat$ATRTN)
   }
 
   # royston parmar model
-  royston_fit <- try(royston_parmar.fit(dat,3,3,2), silent=T)
+  royston_fit <- try(royston_parmar.fit(dat,0,0,0))
   if (class(royston_fit) == "try-error") {
     royston_fit <- list(
       par = c("theta01" = NA, "theta02" = NA, "theta12" = NA)
@@ -58,7 +58,7 @@ run_simulation <- function(unused) {
     royston_error <- NA
   } else {
     royston_fns <- do.call(royston_parmar.fnBuilder, make_pars2(royston_fit$par, royston_parmar.initials(dat,3,3,2)))
-    royston_error <- exp(logS_t(dat$PFSDY, dat$ATRTN)) - joly$P00(rep(0,length(dat$PFSDY)), dat$PFSDY, dat$ATRTN)
+    royston_error <- exp(logS_t(dat$PFSDY, dat$ATRTN)) - royston_fns$P00(rep(0,length(dat$PFSDY)), dat$PFSDY, dat$ATRTN)
   }
 
   #basic debugging
@@ -82,5 +82,5 @@ run_simulation <- function(unused) {
     "RoystonTheta12" = royston_fit$par[["theta12"]])
 }
 
-exp_dist_sims <- parallel::mclapply(1:100, run_simulation, mc.cores=32)
+exp_dist_sims <- parallel::mclapply(1:100, run_simulation, mc.cores=16)
 save(list="exp_dist_sims", file=file.path(Sys.getenv("HOME"),"exp_dist_sims.rda"))
