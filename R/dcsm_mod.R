@@ -10,6 +10,7 @@ print.dcsm_mod <- function(x, ...) {
   cat(paste(names(thetas), collapse = "\t"))
   cat("\n")
   cat(paste(format(thetas, digits = 3), collapse = "\t"))
+  cat("\n")
 }
 
 #' Plot the survivor curve for a dual-censored model
