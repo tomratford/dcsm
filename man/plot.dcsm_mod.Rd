@@ -4,7 +4,7 @@
 \alias{plot.dcsm_mod}
 \title{Plot the survivor curve for a dual-censored model}
 \usage{
-\method{plot}{dcsm_mod}(x, treat_col = "blue", add = F, ...)
+\method{plot}{dcsm_mod}(x, treat_col = "blue", add = F, CI = F, tol = 1e-20, ...)
 }
 \arguments{
 \item{x}{A \code{dcsm_mod} object}
