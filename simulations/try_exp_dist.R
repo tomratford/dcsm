@@ -4,7 +4,7 @@ dat <- sim_exp()
 # Forward fit from 0 knots
 rknots <- c(0, 0, 0)
 fit_royston <- \(ks) {
-  v <- try(royston_parmar.fit(dat, ks[1], ks[2], ks[3]),T)
+  v <- try(royston_parmar.fit(dat, ks[1], ks[2], ks[3]))
   if (class(v) == "try-error") {
     v <- list(value = NA)
   }
@@ -26,30 +26,30 @@ while (TRUE) {
 
   possible_mods <- parallel::mclapply(possible_rknots, fit_royston, mc.cores = 16)
 
-  if (all(possible_rknots[[1]] > 0)) {
+  if (all(possible_rknots[[1]] >= 0)) {
     Tstat <- 2 * (royston_mod$value - possible_mods[[1]]$value)
     pvals[1] <- pchisq(Tstat, 1)
   } else {
     pvals[1] <- 0
   }
 
-  if (all(possible_rknots[[2]] > 0)) {
+  if (all(possible_rknots[[2]] >= 0)) {
     Tstat <- 2 * (royston_mod$value - possible_mods[[2]]$value)
     pvals[2] <- pchisq(Tstat, 1)
   } else {
     pvals[2] <- 0
   }
 
-  if (all(possible_rknots[[3]] > 0)) {
+  if (all(possible_rknots[[3]] >= 0)) {
     Tstat <- 2 * (royston_mod$value - possible_mods[[3]]$value)
     pvals[3] <- pchisq(Tstat, 1)
   } else {
     pvals[3] <- 0
   }
 
+  print(pvals)
   if (any(pvals >= 0.05)) {
     replace <- which(max(pvals) == pvals)
-    print(possible_rknots[[replace]])
     royston_mod <- possible_mods[[replace]]
     rknots <- possible_rknots[[replace]]
     history_royston_mods[length(history_royston_mods) + 1] <- royston_mod
