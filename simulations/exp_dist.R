@@ -86,5 +86,5 @@ run_simulation <- function(unused) {
   )
 }
 
-exp_dist_sims <- parallel::mclapply(1:100, run_simulation, mc.cores=16)
+exp_dist_sims <- parallel::mclapply(1:100, run_simulation, mc.cores=13)
 save(list="exp_dist_sims", file=file.path(Sys.getenv("HOME"),"exp_dist_sims.rda"))

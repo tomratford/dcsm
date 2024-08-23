@@ -31,7 +31,7 @@ while (TRUE) {
   possible_rknots[[2]] <- rknots + c(0, 1, 0)
   possible_rknots[[3]] <- rknots + c(0, 0, 1)
 
-  possible_mods <- parallel::mclapply(possible_rknots, fit_royston, mc.cores = 16)
+  possible_mods <- parallel::mclapply(possible_rknots, fit_royston, mc.cores = 3)
 
   values <- sapply(possible_mods, \(x) x$value)
   pvals <- pchisq(2*(values - royston_mod$value),1)
@@ -72,7 +72,7 @@ while (TRUE) {
   possible_jknots[[2]] <- jknots - c(0, 1, 0)
   possible_jknots[[3]] <- jknots - c(0, 0, 1)
 
-  possible_mods <- parallel::mclapply(possible_rknots, fit_royston, mc.cores = 16)
+  possible_mods <- parallel::mclapply(possible_rknots, fit_royston, mc.cores = 3)
 
   AIC <- sapply(possible_mods, \(x) x$AIC) - joly_mod$AIC
 
