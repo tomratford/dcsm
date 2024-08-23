@@ -23,6 +23,7 @@ history_royston_mods <- list(royston_mod)
 history_rknots <- list(rknots)
 history_pvals <- c()
 while (TRUE) {
+  cat("Trying new models\n")
   possible_mods <- vector("list", 3)
   pvals <- vector("numeric", 3)
   possible_rknots <- vector("list", 3)
@@ -35,13 +36,14 @@ while (TRUE) {
                             \(rk) mapply(\(x,y) min(x,y), rk, c(3,3,3)))
 
   possible_mods <- parallel::mclapply(possible_rknots, fit_royston, mc.cores = 3)
+  cat("Fitted new models\n")
 
   values <- sapply(possible_mods, \(x) x$value)
   pvals <- pchisq(2*(values - royston_mod$value),1)
 
   if (any(pvals >= 0.05)) {
     replace <- which(max(pvals) == pvals)
-    cat("New model:",format(possible_rknots[[replace]]),"\n")
+    cat("Replaced with new model:",format(possible_rknots[[replace]]),"\n")
     royston_mod <- possible_mods[[replace]]
     rknots <- possible_rknots[[replace]]
     history_royston_mods[[length(history_royston_mods) + 1]] <- royston_mod
