@@ -31,10 +31,11 @@ while (TRUE) {
   possible_mods <- parallel::mclapply(possible_rknots, fit_royston, mc.cores = 16)
 
   values <- sapply(possible_mods, \(x) x$value)
-  pvals <- pchisq(2*(values - royston_mod$value),1)
+  Ts <- 2*(values - royston_mod$value)
+  pvals <- pchisq(Ts,1,lower.tail=F)
 
-  if (any(pvals >= 0.05)) {
-    replace <- which(max(pvals) == pvals)
+  if (any(pvals <= 0.05)) {
+    replace <- which(max(Ts) == Ts)
     royston_mod <- possible_mods[[replace]]
     rknots <- possible_rknots[[replace]]
     history_royston_mods[[length(history_royston_mods) + 1]] <- royston_mod
