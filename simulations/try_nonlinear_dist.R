@@ -30,7 +30,6 @@ while (TRUE) {
 
   if (any(AIC >= 4)) {
     replace <- which(max(AIC) == AIC)
-    cat("New model:",format(possible_jknots[[replace]]),"\n")
     joly_mod <- possible_mods[[replace]]
     jknots <- possible_jknots[[replace]]
     history_joly_mods[[length(history_joly_mods) + 1]] <- joly_mod
@@ -40,20 +39,3 @@ while (TRUE) {
     break
   }
 }
-cat("Joly Model done\n")
-
-save(
-  list = c("weib_mod", "royston_mod", "joly_mod"),
-  file = file.path(Sys.getenv("HOME"), "50203_mods.rda")
-)
-save(
-  list = c(
-    "history_royston_mods",
-    "history_rknots",
-    "history_pvals",
-    "history_joly_mods",
-    "history_jknots",
-    "history_aic"
-  ),
-  file = file.path(Sys.getenv("HOME"), "50203_history.rda")
-)
