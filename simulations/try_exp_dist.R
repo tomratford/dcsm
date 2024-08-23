@@ -24,6 +24,10 @@ while (TRUE) {
   possible_rknots[[2]] <- rknots + c(0, 1, 0)
   possible_rknots[[3]] <- rknots + c(0, 0, 1)
 
+  # restrict to a maximum of three knots
+  possible_rknots <- lapply(possible_rknots,
+                            \(rk) mapply(\(x,y) min(x,y), rk, c(3,3,3)))
+
   possible_mods <- parallel::mclapply(possible_rknots, fit_royston, mc.cores = 16)
 
   values <- sapply(possible_mods, \(x) x$value)
