@@ -16,6 +16,7 @@ fit_royston <- \(ks) {
   if (class(v) == "try-error") {
     v <- list(value = NA)
   }
+  cat("Fit model with knots", format(ks), "\n")
   v
 }
 royston_mod <- fit_royston(rknots)
