@@ -32,6 +32,7 @@ while (TRUE) {
   possible_rknots[[1]] <- rknots + c(1, 0, 0)
   possible_rknots[[2]] <- rknots + c(0, 1, 0)
   possible_rknots[[3]] <- rknots + c(0, 0, 1)
+  cat(format(possible_rknots),"\n")
   # restrict to a maximum of three knots
   possible_rknots <- lapply(possible_rknots,
                             \(rk) mapply(\(x,y) min(x,y), rk, c(3,3,3)))
@@ -44,6 +45,7 @@ while (TRUE) {
 
   if (any(pvals >= 0.05)) {
     replace <- which(max(pvals) == pvals)
+    cat(format(replace))
     cat("Replaced with new model:",format(possible_rknots[[replace]]),"\n")
     royston_mod <- possible_mods[[replace]]
     rknots <- possible_rknots[[replace]]
