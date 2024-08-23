@@ -41,6 +41,7 @@ while (TRUE) {
 
   if (any(pvals >= 0.05)) {
     replace <- which(max(pvals) == pvals)
+    cat("New model:",format(possible_rknots[[replace]]),"\n")
     royston_mod <- possible_mods[[replace]]
     rknots <- possible_rknots[[replace]]
     history_royston_mods[[length(history_royston_mods) + 1]] <- royston_mod
@@ -82,6 +83,7 @@ while (TRUE) {
 
   if (any(AIC >= 4)) {
     replace <- which(max(AIC) == AIC)
+    cat("New model:",format(possible_jknots[[replace]]),"\n")
     joly_mod <- possible_mods[[replace]]
     jknots <- possible_jknots[[replace]]
     history_joly_mods[[length(history_royston_mods) + 1]] <- joly_mod
