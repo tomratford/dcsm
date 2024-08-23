@@ -83,7 +83,7 @@ while (TRUE) {
   possible_jknots[[2]] <- jknots + c(0, 1, 0)
   possible_jknots[[3]] <- jknots + c(0, 0, 1)
 
-  possible_mods <- parallel::mclapply(possible_rknots, fit_royston, mc.cores = 3)
+  possible_mods <- lapply(possible_rknots, fit_royston)
 
   AIC <- sapply(possible_mods, \(x) x$AIC) - joly_mod$AIC
 
