@@ -12,7 +12,7 @@ weib_mod <- weib.fit(dat)
 cat("Fitting Royston Model\n")
 rknots <- c(0, 0, 0)
 fit_royston <- \(ks) {
-  v <- try(royston_parmar.fit(dat, ks[1], ks[2], ks[3]))
+  v <- try(royston_parmar.fit(dat, ks[1], ks[2], ks[3], control=list(fnscale=-1,maxit=500,trace=10)))
   if (class(v) == "try-error") {
     v <- list(value = NA)
   }
@@ -36,7 +36,7 @@ while (TRUE) {
   possible_rknots <- lapply(possible_rknots,
                             \(rk) mapply(\(x,y) min(x,y), rk, c(3,3,3)))
 
-  possible_mods <- parallel::mclapply(possible_rknots, fit_royston, mc.cores = 3)
+  possible_mods <- lapply(possible_rknots, fit_royston)
   cat("Fitted new models\n")
 
   values <- sapply(possible_mods, \(x) x$value)
