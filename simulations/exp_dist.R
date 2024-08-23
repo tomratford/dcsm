@@ -50,14 +50,14 @@ run_simulation <- function(unused) {
   }
 
   # royston parmar model
-  royston_fit <- try(royston_parmar.fit(dat,0,0,0))
+  royston_fit <- try(royston_parmar.fit(dat,0,0,2))
   if (class(royston_fit) == "try-error") {
     royston_fit <- list(
       par = c("theta01" = NA, "theta02" = NA, "theta12" = NA)
     )
     royston_error <- NA
   } else {
-    royston_fns <- do.call(royston_parmar.fnBuilder, make_pars2(royston_fit$par, royston_parmar.initials(dat,0,0,0)))
+    royston_fns <- do.call(royston_parmar.fnBuilder, make_pars2(royston_fit$par, royston_parmar.initials(dat,0,0,2)))
     royston_error <- exp(logS_t(dat$PFSDY, dat$ATRTN)) - royston_fns$P00(rep(0,length(dat$PFSDY)), dat$PFSDY, dat$ATRTN)
   }
 
