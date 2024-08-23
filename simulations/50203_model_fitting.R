@@ -71,7 +71,7 @@ fit_joly <- \(ks) {
   v
 }
 joly_mod <- fit_joly(jknots)
-history_joly_mods <- list(royston_mod)
+history_joly_mods <- list(joly_mod)
 history_jknots <- list(jknots)
 history_aic <- c()
 while (TRUE) {
@@ -83,7 +83,7 @@ while (TRUE) {
   possible_jknots[[2]] <- jknots + c(0, 1, 0)
   possible_jknots[[3]] <- jknots + c(0, 0, 1)
 
-  possible_mods <- lapply(possible_rknots, fit_royston)
+  possible_mods <- lapply(possible_jknots, fit_joly)
 
   AIC <- sapply(possible_mods, \(x) x$AIC) - joly_mod$AIC
 
@@ -92,8 +92,8 @@ while (TRUE) {
     cat("New model:",format(possible_jknots[[replace]]),"\n")
     joly_mod <- possible_mods[[replace]]
     jknots <- possible_jknots[[replace]]
-    history_joly_mods[[length(history_royston_mods) + 1]] <- joly_mod
-    history_jknots[[length(history_rknots) + 1]] <- jknots
+    history_joly_mods[[length(history_joly_mods) + 1]] <- joly_mod
+    history_jknots[[length(history_jknots) + 1]] <- jknots
     history_aic <- c(history_aic, AIC[[replace]])
   } else {
     break
