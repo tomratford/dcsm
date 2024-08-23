@@ -45,7 +45,7 @@ while (TRUE) {
 
   if (any(pvals >= 0.05)) {
     replace <- which(max(pvals) == pvals)
-    cat(format(replace))
+    cat("Pvals:", format(pvals),"\n")
     cat("Replaced with new model:",format(possible_rknots[[replace]]),"\n")
     royston_mod <- possible_mods[[replace]]
     rknots <- possible_rknots[[replace]]
