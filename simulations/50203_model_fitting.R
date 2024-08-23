@@ -41,10 +41,11 @@ while (TRUE) {
   cat("Fitted new models\n")
 
   values <- sapply(possible_mods, \(x) x$value)
-  pvals <- pchisq(2*(values - royston_mod$value),1)
+  Ts <- 2*(values - royston_mod$value)
+  pvals <- pchisq(Ts,1)
 
   if (any(pvals >= 0.05)) {
-    replace <- which(max(pvals) == pvals)
+    replace <- which(max(Ts) == Ts)
     cat("Pvals:", format(pvals),"\n")
     cat("Replaced with new model:",format(possible_rknots[[replace]]),"\n")
     royston_mod <- possible_mods[[replace]]
