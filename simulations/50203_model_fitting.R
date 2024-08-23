@@ -10,7 +10,8 @@ weib_mod <- weib.fit(dat)
 # Royston-Parmar model
 # Forward fit from 0 knots
 cat("Fitting Royston Model\n")
-rknots <- c(0, 0, 0)
+# rknots <- c(0, 0, 0) # for full model fitting
+rknots <- c(2, 1, 1) # best model
 fit_royston <- \(ks) {
   v <- try(royston_parmar.fit(dat, ks[1], ks[2], ks[3], control=list(fnscale=-1,maxit=500,trace=10)))
   if (class(v) == "try-error") {
