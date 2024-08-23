@@ -57,7 +57,7 @@ run_simulation <- function(unused) {
     )
     royston_error <- NA
   } else {
-    royston_fns <- do.call(royston_parmar.fnBuilder, make_pars2(royston_fit$par, royston_parmar.initials(dat,3,3,2)))
+    royston_fns <- do.call(royston_parmar.fnBuilder, make_pars2(royston_fit$par, royston_parmar.initials(dat,0,0,0)))
     royston_error <- exp(logS_t(dat$PFSDY, dat$ATRTN)) - royston_fns$P00(rep(0,length(dat$PFSDY)), dat$PFSDY, dat$ATRTN)
   }
 
@@ -66,20 +66,24 @@ run_simulation <- function(unused) {
   cat(unused)
   cat("\n")
 
-  c("CoxMSE" = mean(cox_error^2),
-    "CoxTheta" = unname(cox_mod$coef),
-    "WeibMSE" = mean(weib_error^2),
-    "WeibTheta01" = weib_fit$par[["theta01"]],
-    "WeibTheta02" = weib_fit$par[["theta02"]],
-    "WeibTheta12" = weib_fit$par[["theta12"]],
-    "JolyMSE" = mean(joly_error^2),
-    "JolyTheta01" = joly_fit$par[["theta01"]],
-    "JolyTheta02" = joly_fit$par[["theta02"]],
-    "JolyTheta12" = joly_fit$par[["theta12"]],
-    "RoystonMSE" = mean(royston_error^2),
-    "RoystonTheta01" = royston_fit$par[["theta01"]],
-    "RoystonTheta02" = royston_fit$par[["theta02"]],
-    "RoystonTheta12" = royston_fit$par[["theta12"]])
+  return(
+    c(
+      "CoxMSE" = mean(cox_error ^ 2),
+      "CoxTheta" = unname(cox_mod$coef),
+      "WeibMSE" = mean(weib_error ^ 2),
+      "WeibTheta01" = weib_fit$par[["theta01"]],
+      "WeibTheta02" = weib_fit$par[["theta02"]],
+      "WeibTheta12" = weib_fit$par[["theta12"]],
+      "JolyMSE" = mean(joly_error ^ 2),
+      "JolyTheta01" = joly_fit$par[["theta01"]],
+      "JolyTheta02" = joly_fit$par[["theta02"]],
+      "JolyTheta12" = joly_fit$par[["theta12"]],
+      "RoystonMSE" = mean(royston_error ^ 2),
+      "RoystonTheta01" = royston_fit$par[["theta01"]],
+      "RoystonTheta02" = royston_fit$par[["theta02"]],
+      "RoystonTheta12" = royston_fit$par[["theta12"]]
+    )
+  )
 }
 
 exp_dist_sims <- parallel::mclapply(1:100, run_simulation, mc.cores=16)
