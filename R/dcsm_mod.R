@@ -114,10 +114,14 @@ dcsm_se <- function(x, fns, tol=NULL) {
       if (length(z) == 1) {
         z <- rep(z, length(tm))
       }
+      if (!exists("initials",attributes(x))) {
+        stop("Need initial parameters")
+      }
       zeros <- rep(0, length(tm))
 
-      g01n <- length(startswith(names(x$par), "gammas01"))
-      g02n <- length(startswith(names(x$par), "gammas02"))
+      g01n <- sum(startsWith(names(x$par), "gammas01"))
+      g02n <- sum(startsWith(names(x$par), "gammas02"))
+      g12n <- sum(startsWith(names(x$par), "gammas12"))
 
       delta <- matrix(0, ncol = 3 + g01n + g02n + g12n, nrow = length(tm))
 
@@ -128,20 +132,20 @@ dcsm_se <- function(x, fns, tol=NULL) {
       delta[, 1] <- -z * A01 * P00s
       delta[, 2] <- -z * A02 * P00s
 
-      delta[, 4:(4 + g01n)] <- nsp(
+      delta[, 4:(4 + g01n - 1)] <- nsp(
         tm,
-        knots = pars$knots01,
-        Boundary.knots = pars$boundaries,
+        knots = attr(x,"initials")$knots01,
+        Boundary.knots = attr(x,"initials")$boundaries,
         intercept = T,
         derivs = 1
-      ) * A01 * P00s
-      delta[, (4 + g01n):(4 + g01n + g02n)] <- nsp(
+      ) * as.vector(A01 * P00s)
+      delta[, (4 + g01n):(4 + g01n + g02n - 1)] <- nsp(
         tm,
-        knots = pars$knots02,
-        Boundary.knots = pars$boundaries,
+        knots = attr(x,"initials")$knots02,
+        Boundary.knots = attr(x,"initials")$boundaries,
         intercept = T,
         derivs = 1
-      ) * A02 * P00s
+      ) * as.vector(A02 * P00s)
 
       diag(sqrt(delta %*% Io %*% t(delta)))
     },
@@ -149,10 +153,14 @@ dcsm_se <- function(x, fns, tol=NULL) {
       if (length(z) == 1) {
         z <- rep(z, length(tm))
       }
+      if (!exists("initials",attributes(x))) {
+        stop("Need initial parameters")
+      }
       zeros <- rep(0, length(tm))
 
-      g01n <- length(startswith(names(x$par), "gammas01"))
-      g02n <- length(startswith(names(x$par), "gammas02"))
+      g01n <- sum(startsWith(names(x$par), "gammas01"))
+      g02n <- sum(startsWith(names(x$par), "gammas02"))
+      g12n <- sum(startsWith(names(x$par), "gammas12"))
 
       delta <- matrix(0, ncol = 3 + g01n + g02n + g12n, nrow = length(tm))
 
@@ -163,20 +171,20 @@ dcsm_se <- function(x, fns, tol=NULL) {
       delta[, 1] <- -z * A01 * P00s
       delta[, 2] <- -z * A02 * P00s
 
-      delta[, 4:(4 + g01n)] <- isp(
+      delta[, 4:(4 + g01n - 1)] <- isp(
         tm,
-        knots = pars$knots01,
-        Boundary.knots = pars$boundaries,
+        knots = attr(x,"initials")$knots01,
+        Boundary.knots = attr(x,"initials")$boundaries,
         intercept = T,
         derivs = 1
-      ) * exp(z * x$par[["theta01"]]) * P00s
-      delta[, (4 + g01n):(4 + g01n + g02n)] <- isp(
+      ) * as.vector(exp(z * x$par[["theta01"]]) * P00s)
+      delta[, (4 + g01n):(4 + g01n + g02n - 1)] <- isp(
         tm,
-        knots = pars$knots02,
-        Boundary.knots = pars$boundaries,
+        knots = attr(x,"initials")$knots02,
+        Boundary.knots = attr(x,"initials")$boundaries,
         intercept = T,
         derivs = 1
-      ) * exp(z * x$par[["theta02"]]) * P00s
+      ) * as.vector(exp(z * x$par[["theta02"]]) * P00s)
 
       diag(sqrt(delta %*% Io %*% t(delta)))
     },
