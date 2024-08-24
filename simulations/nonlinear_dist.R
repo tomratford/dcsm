@@ -52,7 +52,7 @@ run_simulation <- function(unused) {
     joly_error <- NA
   } else {
     joly_fns <- do.call(joly.fnBuilder, make_pars2(joly_fit$par, joly.initials(dat,1,0,1)))
-    joly_error <- exp(logS_t(dat$PFSDY, dat$ATRTN)) - joly$P00(rep(0,length(dat$PFSDY)), dat$PFSDY, dat$ATRTN)
+    joly_error <- exp(logS_t(dat$PFSDY, dat$ATRTN)) - joly_fns$P00(rep(0,length(dat$PFSDY)), dat$PFSDY, dat$ATRTN)
   }
 
   # royston parmar model
@@ -64,7 +64,7 @@ run_simulation <- function(unused) {
     royston_error <- NA
   } else {
     royston_fns <- do.call(royston_parmar.fnBuilder, make_pars2(royston_fit$par, royston_parmar.initials(dat,1,0,2)))
-    royston_error <- exp(logS_t(dat$PFSDY, dat$ATRTN)) - joly$P00(rep(0,length(dat$PFSDY)), dat$PFSDY, dat$ATRTN)
+    royston_error <- exp(logS_t(dat$PFSDY, dat$ATRTN)) - royston_fns$P00(rep(0,length(dat$PFSDY)), dat$PFSDY, dat$ATRTN)
   }
 
   #basic debugging
