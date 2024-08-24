@@ -27,9 +27,11 @@ while (TRUE) {
   possible_mods <- lapply(possible_jknots, fit_joly)
 
   AIC <- joly_mod$AIC - sapply(possible_mods, \(x) x$AIC)
+  cat("AIC:", format(AIC), "\n")
 
   if (any(AIC >= 4)) {
     replace <- which(max(AIC) == AIC)
+    cat(replace,"\n") # debug possible error herer
     joly_mod <- possible_mods[[replace]]
     jknots <- possible_jknots[[replace]]
     history_joly_mods[[length(history_joly_mods) + 1]] <- joly_mod
