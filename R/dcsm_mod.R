@@ -31,7 +31,7 @@ plot.dcsm_mod <- function(x,
   if (attr(x, "dist") == "weibull") {
     pars <- as.list(x$par)
   } else {
-    if (exists(attr(x, "initials"))) {
+    if (exists("initials",attributes(royston_mod))) {
       pars <- make_pars2(x$par, attr(x, "initials"))
     } else {
       stop("No initials found, running this will brick your R session")
