@@ -92,7 +92,7 @@ plot.dcsm_mod <- function(x,
 #' @return A function to find the standard error at time \code{tm} with treatment arm \code{z}.
 #' @importFrom splines2 nsp isp
 dcsm_se <- function(x, fns, tol=NULL) {
-  if (!exists("hessian", weib_mod)) {
+  if (!exists("hessian", x)) {
     stop("Hessian required, rerun model fitting with `hessian=T`")
   }
   Io <- solve(-x$hessian, tol=tol)
