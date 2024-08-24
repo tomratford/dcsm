@@ -87,6 +87,8 @@ while (TRUE) {
   possible_mods <- lapply(possible_jknots, fit_joly)
 
   AIC <- sapply(possible_mods, \(x) x$AIC) - joly_mod$AIC
+  cat(format(possible_jknots),"\n")
+  cat(format(AIC),"\n")
 
   if (any(AIC >= 4)) {
     replace <- which(max(AIC) == AIC)
