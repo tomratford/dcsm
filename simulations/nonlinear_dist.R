@@ -44,28 +44,33 @@ run_simulation <- function(unused) {
   weib_error <-  exp(logS_t(dat$PFSDY, dat$ATRTN)) - weib_fns$P00(0, dat$PFSDY, dat$ATRTN)
 
   # penalised spline model
-  joly_fit <- try(joly.fit(dat,0,0,0,100,100,100,compute_cross = F),silent=T)
+  joly_fit <- try(joly.fit(dat,1,0,1,100,100,100,compute_cross = F),silent=T)
   if (class(joly_fit) == "try-error") {
     joly_fit <- list(
       par = c("theta01" = NA, "theta02" = NA, "theta12" = NA)
     )
     joly_error <- NA
   } else {
-    joly_fns <- do.call(joly.fnBuilder, make_pars2(joly_fit$par, joly.initials(dat,0,0,0)))
+    joly_fns <- do.call(joly.fnBuilder, make_pars2(joly_fit$par, joly.initials(dat,1,0,1)))
     joly_error <- exp(logS_t(dat$PFSDY, dat$ATRTN)) - joly$P00(rep(0,length(dat$PFSDY)), dat$PFSDY, dat$ATRTN)
   }
 
   # royston parmar model
-  royston_fit <- try(royston_parmar.fit(dat,3,3,2), silent=T)
+  royston_fit <- try(royston_parmar.fit(dat,1,0,2), silent=T)
   if (class(royston_fit) == "try-error") {
     royston_fit <- list(
       par = c("theta01" = NA, "theta02" = NA, "theta12" = NA)
     )
     royston_error <- NA
   } else {
-    royston_fns <- do.call(royston_parmar.fnBuilder, make_pars2(royston_fit$par, royston_parmar.initials(dat,3,3,2)))
+    royston_fns <- do.call(royston_parmar.fnBuilder, make_pars2(royston_fit$par, royston_parmar.initials(dat,1,0,2)))
     royston_error <- exp(logS_t(dat$PFSDY, dat$ATRTN)) - joly$P00(rep(0,length(dat$PFSDY)), dat$PFSDY, dat$ATRTN)
   }
+
+  #basic debugging
+  cat("Completed Sim #")
+  cat(unused)
+  cat("\n")
 
   c("CoxMSE" = mean(cox_error^2),
     "CoxTheta" = unname(cox_mod$coef),
@@ -83,5 +88,5 @@ run_simulation <- function(unused) {
     "RoystonTheta12" = royston_fit$par[["theta12"]])
 }
 
-nonlinear_sims <- parallel::mclapply(1:100, run_simulation, mc.cores = 32)
+nonlinear_sims <- parallel::mclapply(1:100, run_simulation, mc.cores = 15)
 save(list="nonlinear_sims", file=file.path(Sys.getenv("HOME"),"nonlinear_sims.rda"))
