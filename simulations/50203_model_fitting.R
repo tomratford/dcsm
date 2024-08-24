@@ -86,7 +86,7 @@ while (TRUE) {
 
   possible_mods <- lapply(possible_jknots, fit_joly)
 
-  AIC <- sapply(possible_mods, \(x) x$AIC) - joly_mod$AIC
+  AIC <- joly_mod$AIC - sapply(possible_mods, \(x) x$AIC)
   cat(format(possible_jknots),"\n")
   cat(format(AIC),"\n")
 
