@@ -36,7 +36,7 @@ joly.fit <- function(data,
                               "gammas01",
                               "gammas02",
                               "gammas12")])
-  opt_out <- optim(p_init,
+  opt_out <- optimPararllel::optimParallel(p_init,
                    \(p) {
                      pars <- make_pars2(p, initials)
                      if (debug)
