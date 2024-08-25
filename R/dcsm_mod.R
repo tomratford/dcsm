@@ -23,6 +23,7 @@ print.dcsm_mod <- function(x, ...) {
 #' @return Nothing, plots to output
 #' @export
 plot.dcsm_mod <- function(x,
+                          col = "black",
                           treat_col = "blue",
                           add = F,
                           CI = F,
@@ -47,18 +48,20 @@ plot.dcsm_mod <- function(x,
   if (CI) {
     se <- dcsm_se(x, fns, tol)
   }
-  curve(fns$P00(rep(0, length(x)), x, rep(0, length(x))), add = add, ...)
+  curve(fns$P00(rep(0, length(x)), x, rep(0, length(x))), add = add, col=col, ...)
   if (CI) {
     curve(
       fns$P00(rep(0, length(x)), x, rep(0, length(x))) + qnorm(0.975) * se(x, 0),
       add = T,
       lty = 2,
+      col = col,
       ...
     )
     curve(
       fns$P00(rep(0, length(x)), x, rep(0, length(x))) - qnorm(0.975) * se(x, 0),
       add = T,
       lty = 2,
+      col = col,
       ...
     )
   }
