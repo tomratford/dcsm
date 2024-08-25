@@ -85,17 +85,19 @@ sim_nonlinear <- function(N = 300,
   }
 
   # post progression death
-  u_12 <- runif(N,max = 1 - u_01)
+  u_12 <- runif(N)
   T_12s <- numeric(N)
+  T12errors <- 0
   for (i in 1:N) {
     if (is.na(T_01s[i]) || (!is.na(T_01s[i]) && !is.na(T_02s[i]) && T_02s[i] < T_01s[i])) {
       T_12s[i] <- NA
       next
     }
-    temp <- try(newton_raphson(\(x, z) -A12(x)*exp(z*theta12) - log(u_12[i]),
-                               \(x,z) -a12(x)*exp(z*theta12),
+    temp <- try(newton_raphson(\(x, z) A12(x)*exp(z*theta12) + log(u_12[i]) - A12(T_01s[i])*exp(z*theta12),
+                               \(x,z)  a12(x)*exp(z*theta12),
                                Zs[i]), silent)
     if (class(temp) == "try-error") {
+      T12errors <- T12errors + 1
       T_12s[i] <- NA
     } else {
       T_12s[i] <- T_01s[i] + temp
@@ -208,5 +210,6 @@ sim_nonlinear <- function(N = 300,
   )
   attr(dat, "Ca") <- C_a
   attr(dat, "S") <- P00
+  attr(dat, "T12errors") <- T12errors
   dat
 }
