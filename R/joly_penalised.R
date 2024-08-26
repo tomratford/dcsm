@@ -131,7 +131,8 @@ joly.fit <- function(data,
       )$value
       kappa01 * penalty01 + kappa02 * penalty02 + kappa12 * penalty12
     }, control = list(fnscale = -1))
-    opt_out$cross_value <- opt_out$loglik - sum(diag(solve(opt_out$hessian) %*%
+    opt_out$cross_value <- opt_out$loglik - sum(diag(solve(opt_out$hessian, tol =
+                                                             1e-20) %*%
                                                        opt_out$hessian2))
   }
   attr(opt_out, "dist") <- "joly"
