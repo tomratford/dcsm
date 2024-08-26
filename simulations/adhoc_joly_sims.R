@@ -43,7 +43,7 @@ run_exp_sim <- function(unused) {
       "JolyMSE" = mean(joly_error ^ 2),
       "JolyTheta01" = joly_fit$par[["theta01"]],
       "JolyTheta02" = joly_fit$par[["theta02"]],
-      "JolyTheta12" = joly_fit$par[["theta12"]],
+      "JolyTheta12" = joly_fit$par[["theta12"]]
     )
   )
 }
