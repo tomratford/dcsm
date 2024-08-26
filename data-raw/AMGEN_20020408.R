@@ -29,7 +29,7 @@ find_delta0 <- adrs %>%
   group_by(SUBJID) %>%
   filter(all(RSRESP != "Progressive disease")) %>%
   mutate(assessment_post_censoring = max(as.numeric(VISITDY >= DTHDYX &
-                                                      RSRESP != "Unable to evaluate"))) %>% # if they're known to have not progressed (what about subject 7?)
+                                                      (RSRESP != "Unable to evaluate" | RSRESP != "Unknown")))) %>% # if they're known to have not progressed (what about subject 7?)
   filter(VISITDY <= DTHDYX) %>%
   mutate(LASTDY = lag(VISITDY), LASTVISIT = lag(VISIT)) %>%
   arrange(desc(VISITDY)) %>%
@@ -47,6 +47,21 @@ find_delta0 <- adrs %>%
   ungroup() %>%
   select(SUBJID, L = LASTDY, R = VISITDY, delta0)
 
+# Alternative approach, if last response was stable/partial and left within 3 months then known to not?
+find_delta0_2 <- adrs %>%
+  left_join(select(adsl, SUBJID, DTHDYX, DTHX), by = "SUBJID") %>%
+  group_by(SUBJID) %>%
+  filter(all(RSRESP != "Progressive disease")) %>%
+  mutate(LASTDY = lag(VISITDY), LASTVISIT = lag(VISIT)) %>%
+  ungroup() %>%
+  filter(RSRESP == "Stable disease") %>%
+  arrange(SUBJID, desc(VISITDY)) %>%
+  distinct(SUBJID, .keep_all = T) %>%
+  mutate(dy_diff = DTHDYX - VISITDY) %>%
+  filter(dy_diff < 92) %>%
+  mutate(delta0_tmp = 1) %>%
+  select(SUBJID, delta0_tmp)
+
 find_ints <- bind_rows(find_delta1, find_delta0) %>%
   mutate(
     delta1 = if_else(is.na(delta1), 0, delta1),
@@ -57,14 +72,18 @@ find_ints <- bind_rows(find_delta1, find_delta0) %>%
 addc <- adsl %>%
   select(SUBJID, TRT, ATRT, V = DTHDYX, delta2 = DTHX) %>%
   left_join(find_ints, "SUBJID") %>%
+  left_join(find_delta0_2, "SUBJID") %>%
   mutate(
     R = if_else(R > V, V, R),
     R = if_else(is.na(R), V, R), # if no right value, set to censoring
     L = if_else(is.na(L), 0, L), # if no left value, set to 0
+  ) %>%
+  mutate(
     delta1 = if_else(is.na(delta1), 0, delta1),
-    delta0 = if_else(is.na(delta0), 0, delta0),
+    delta0 = if_else(!is.na(delta0_tmp), 1, if_else(!is.na(delta0), delta0, 0)),
     ATRTN = case_match(ATRT, "Best supportive care" ~ 0, .default = 1)
-  )
+  ) %>%
+  select(-delta0_tmp)
 
 AMGEN_20020408 <- addc %>%
   mutate(L = L / 365.25,
