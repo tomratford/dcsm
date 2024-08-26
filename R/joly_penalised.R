@@ -25,7 +25,7 @@ joly.fit <- function(data,
                      compute_cross = T,
                      debug = F,
                      initials = NULL,
-                     control = list(fnscale = -1, maxit=500),
+                     control = list(fnscale = -1, maxit = 500),
                      method = "BFGS",
                      ...) {
   if (is.null(initials))
@@ -36,112 +36,103 @@ joly.fit <- function(data,
                               "gammas01",
                               "gammas02",
                               "gammas12")])
-  opt_out <- optim(p_init,
-                   \(p) {
-                     pars <- make_pars2(p, initials)
-                     if (debug)
-                       print(pars[c("theta01",
-                                    "theta02",
-                                    "theta12",
-                                    "gammas01",
-                                    "gammas02",
-                                    "gammas12")])
+  opt_out <- optim(p_init, \(p) {
+    pars <- make_pars2(p, initials)
+    if (debug)
+      print(pars[c("theta01",
+                   "theta02",
+                   "theta12",
+                   "gammas01",
+                   "gammas02",
+                   "gammas12")])
 
-                     spline01 <- new(CubicISpline,
-                                     pars$gammas01,
-                                     pars$knots01,
-                                     pars$boundaries)
-                     spline02 <- new(CubicISpline,
-                                     pars$gammas02,
-                                     pars$knots02,
-                                     pars$boundaries)
-                     spline12 <- new(CubicISpline,
-                                     pars$gammas12,
-                                     pars$knots12,
-                                     pars$boundaries)
+    spline01 <- new(CubicISpline,
+                    pars$gammas01,
+                    pars$knots01,
+                    pars$boundaries)
+    spline02 <- new(CubicISpline,
+                    pars$gammas02,
+                    pars$knots02,
+                    pars$boundaries)
+    spline12 <- new(CubicISpline,
+                    pars$gammas12,
+                    pars$knots12,
+                    pars$boundaries)
 
-                     # Get penalties
-                     penalty01 <- integrate(
-                       \(x) spline01$dS2(x) ^ 2,
-                       lower = pars$boundaries[1],
-                       upper = pars$boundaries[2]
-                     )$value
-                     penalty02 <- integrate(
-                       \(x) spline02$dS2(x) ^ 2,
-                       lower = pars$boundaries[1],
-                       upper = pars$boundaries[2]
-                     )$value
-                     penalty12 <- integrate(
-                       \(x) spline12$dS2(x) ^ 2,
-                       lower = pars$boundaries[1],
-                       upper = pars$boundaries[2]
-                     )$value
-                     penalty <- kappa01 * penalty01 + kappa02 * penalty02 + kappa12 * penalty12
+    # Get penalties
+    penalty01 <- integrate(
+      \(x) spline01$dS2(x) ^ 2,
+      lower = pars$boundaries[1],
+      upper = pars$boundaries[2]
+    )$value
+    penalty02 <- integrate(
+      \(x) spline02$dS2(x) ^ 2,
+      lower = pars$boundaries[1],
+      upper = pars$boundaries[2]
+    )$value
+    penalty12 <- integrate(
+      \(x) spline12$dS2(x) ^ 2,
+      lower = pars$boundaries[1],
+      upper = pars$boundaries[2]
+    )$value
+    penalty <- kappa01 * penalty01 + kappa02 * penalty02 + kappa12 * penalty12
 
-                     if (debug)
-                       print(penalty)
-                     res <- tryCatch(joly.ll(pars, data),
-                                     error = \(e) {
-                                       print(e)
-                                       return(-1e10)
-                                     })
-                     if (debug)
-                       print(res)
-                     res - penalty
-                   },
-                   control = control,
-                   method = method,
-                   ...)
+    if (debug)
+      print(penalty)
+    res <- tryCatch(
+      joly.ll(pars, data),
+      error = \(e) {
+        print(e)
+        return(-1e10)
+      }
+    )
+    if (debug)
+      print(res)
+    res - penalty
+  }, control = control, method = method, ...)
   opt_out$loglik <- joly.ll(make_pars2(opt_out$par, initials), data)
-  opt_out$AIC <- 2*((15 + k01 + k02 + k12) - opt_out$loglik)
+  opt_out$AIC <- 2 * ((15 + k01 + k02 + k12) - opt_out$loglik)
   if (compute_cross) {
-    opt_out$hessian <- optimHess(opt_out$par,
-                                 \(p) {
-                                   pars <- make_pars2(p, initials)
+    opt_out$hessian2 <- optimHess(opt_out$par, \(p) {
+      pars <- make_pars2(p, initials)
+      res <- joly.ll(pars, data)
+      res
+    }, control = list(fnscale = -1))
+    opt_out$hessian <- opt_out$hessian2 - optimHess(opt_out$par, \(p) {
+      pars <- make_pars2(p, initials)
+      spline01 <- new(CubicISpline,
+                      pars$gammas01,
+                      pars$knots01,
+                      pars$boundaries)
+      spline02 <- new(CubicISpline,
+                      pars$gammas02,
+                      pars$knots02,
+                      pars$boundaries)
+      spline12 <- new(CubicISpline,
+                      pars$gammas12,
+                      pars$knots12,
+                      pars$boundaries)
 
-                                   spline01 <- new(CubicISpline,
-                                                   pars$gammas01,
-                                                   pars$knots01,
-                                                   pars$boundaries)
-                                   spline02 <- new(CubicISpline,
-                                                   pars$gammas02,
-                                                   pars$knots02,
-                                                   pars$boundaries)
-                                   spline12 <- new(CubicISpline,
-                                                   pars$gammas12,
-                                                   pars$knots12,
-                                                   pars$boundaries)
-
-                                   # Get penalties
-                                   penalty01 <- integrate(
-                                     \(x) spline01$dS2(x) ^ 2,
-                                     lower = pars$boundaries[1],
-                                     upper = pars$boundaries[2]
-                                   )$value
-                                   penalty02 <- integrate(
-                                     \(x) spline02$dS2(x) ^ 2,
-                                     lower = pars$boundaries[1],
-                                     upper = pars$boundaries[2]
-                                   )$value
-                                   penalty12 <- integrate(
-                                     \(x) spline12$dS2(x) ^ 2,
-                                     lower = pars$boundaries[1],
-                                     upper = pars$boundaries[2]
-                                   )$value
-                                   penalty <- kappa01 * penalty01 + kappa02 * penalty02 + kappa12 * penalty12
-
-                                   res <- joly.ll(pars, data)
-                                   res - penalty
-                                 },
-                                 control = list(fnscale = -1))
-    opt_out$hessian2 <- optimHess(opt_out$par,
-                                  \(p) {
-                                    pars <- make_pars2(p, initials)
-                                    res <- joly.ll(pars, data)
-                                    res
-                                  },
-                                  control = list(fnscale = -1))
-    opt_out$cross_value <- opt_out$loglik - sum(diag(solve(opt_out$hessian)%*%opt_out$hessian2))
+      # Get penalties
+      penalty01 <- integrate(
+        \(x) spline01$dS2(x) ^ 2,
+        lower = pars$boundaries[1],
+        upper = pars$boundaries[2]
+      )$value
+      penalty02 <- integrate(
+        \(x) spline02$dS2(x) ^ 2,
+        lower = pars$boundaries[1],
+        upper = pars$boundaries[2]
+      )$value
+      penalty12 <- integrate(
+        \(x) spline12$dS2(x) ^ 2,
+        lower = pars$boundaries[1],
+        upper = pars$boundaries[2]
+      )$value
+      kappa01 * penalty01 + kappa02 * penalty02 + kappa12 * penalty12
+    }, control = list(fnscale = -1))
+    opt_out$cross_value <- opt_out$loglik - sum(diag(solve(opt_out$hessian) %*%
+                                                       opt_out$hessian2))
   }
   attr(opt_out, "dist") <- "joly"
   attr(opt_out, "initials") <- initials
