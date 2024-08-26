@@ -22,14 +22,14 @@ run_exp_sim <- function(unused) {
                  K = 8) # number of visits
 
   # penalised spline model
-  joly_fit <- try(joly.fit(dat,5,5,5,100,100,100,compute_cross = F),silent=T)
+  joly_fit <- try(joly.fit(dat,5,5,5,10000,10000,10000,compute_cross = F),silent=T)
   if (class(joly_fit) == "try-error") {
     joly_fit <- list(
       par = c("theta01" = NA, "theta02" = NA, "theta12" = NA)
     )
     joly_error <- NA
   } else {
-    joly_fns <- do.call(joly.fnBuilder, make_pars2(joly_fit$par, joly.initials(dat,0,0,0)))
+    joly_fns <- do.call(joly.fnBuilder, make_pars2(joly_fit$par, joly.initials(dat,5,5,5)))
     joly_error <- exp(logS_t(dat$PFSDY, dat$ATRTN)) - joly_fns$P00(rep(0,length(dat$PFSDY)), dat$PFSDY, dat$ATRTN)
   }
 
