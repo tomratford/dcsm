@@ -105,7 +105,7 @@ cat("Joly Model done\n")
 
 save(
   list = c("weib_mod", "royston_mod", "joly_mod"),
-  file = file.path(Sys.getenv("HOME"), "50203_mods.rda")
+  file = file.path(Sys.getenv("HOME"), "20408_mods.rda")
 )
 save(
   list = c(
@@ -116,5 +116,5 @@ save(
     "history_jknots",
     "history_aic"
   ),
-  file = file.path(Sys.getenv("HOME"), "50203_history.rda")
+  file = file.path(Sys.getenv("HOME"), "20408_history.rda")
 )
