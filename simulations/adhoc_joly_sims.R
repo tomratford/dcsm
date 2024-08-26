@@ -97,20 +97,10 @@ run_nonlin_sim <- function(unused) {
   cat(unused)
   cat("\n")
 
-  c("CoxMSE" = mean(cox_error^2),
-    "CoxTheta" = unname(cox_mod$coef),
-    "WeibMSE" = mean(weib_error^2),
-    "WeibTheta01" = weib_fit$par[["theta01"]],
-    "WeibTheta02" = weib_fit$par[["theta02"]],
-    "WeibTheta12" = weib_fit$par[["theta12"]],
-    "JolyMSE" = mean(joly_error^2),
+  c("JolyMSE" = mean(joly_error^2),
     "JolyTheta01" = joly_fit$par[["theta01"]],
     "JolyTheta02" = joly_fit$par[["theta02"]],
-    "JolyTheta12" = joly_fit$par[["theta12"]],
-    "RoystonMSE" = mean(royston_error^2),
-    "RoystonTheta01" = royston_fit$par[["theta01"]],
-    "RoystonTheta02" = royston_fit$par[["theta02"]],
-    "RoystonTheta12" = royston_fit$par[["theta12"]])
+    "JolyTheta12" = joly_fit$par[["theta12"]])
 }
 
 set.seed(123)
