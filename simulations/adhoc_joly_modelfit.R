@@ -22,3 +22,5 @@ fit_model <- function(dat) {
 
 joly_adhoc_50203 <- fit_model(AMGEN_20050203)
 joly_adhoc_20408 <- fit_model(AMGEN_20020408)
+
+save(list=c("joly_adhoc_50203", "joly_adhoc_20408"), file=file.path(Sys.getenv("HOME"),"adhoc_joly_models.rda"))
