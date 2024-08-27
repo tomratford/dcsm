@@ -48,5 +48,8 @@ run_exp_sim <- function(unused) {
   )
 }
 
+set.seed(123)
+joly_exp_dist_sims <- parallel::mclapply(1:100, run_exp_sim, mc.cores=16)
+
 save(list=c("joly_exp_dist_sims"), file=file.path(Sys.getenv("HOME"),"adhoc_joly_1000.rda"))
 
