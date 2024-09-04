@@ -13,6 +13,41 @@ print.dcsm_mod <- function(x, ...) {
   cat("\n")
 }
 
+#' Confidence intervals for dual censored model treatment effects
+#'
+#' @param x a \code{dcsm_mod} object
+#' @param parm Not used
+#' @param level Significance level
+#' @param ... Not used
+#'
+#' @return Matrix of values
+#' @export
+confint.dcsm_mod <- function(x, parm = "thetas", level = 0.95, use_unpenalised=F,...) {
+  if (!exists("hessian", x)) {
+    stop("Hessian required, rerun model fitting with `hessian=T`")
+  }
+  alpha = 1 - level
+
+  if (attr(x, "dist") == "joly" && use_unpenalised) {
+    Io <- solve(-x$hessian2)
+  } else {
+    Io <- solve(-x$hessian)
+  }
+
+  thetas <- c("theta01", "theta02", "theta12")
+  rtn <- matrix(nrow = 3,
+                ncol = 3,
+                dimnames = list(thetas, c("mean", format(alpha / 2), format(1 - (
+                  alpha / 2
+                )))))
+  for (theta in thetas) {
+    val <- x$par[[theta]]
+    ci <- val + c(-1, 1) * qnorm(1 - (alpha / 2)) * sqrt(Io[theta, theta])
+    rtn[theta, ] <- c(val, ci)
+  }
+  rtn
+}
+
 #' Plot the survivor curve for a dual-censored model
 #'
 #' @param x A \code{dcsm_mod} object
